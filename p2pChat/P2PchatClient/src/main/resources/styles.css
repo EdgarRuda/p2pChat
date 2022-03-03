@@ -1,0 +1,18 @@
+#scrollWithoutBars .scroll-bar: horizontal{
+    -fx-pref-height: 1;
+    -fx-opacity: 0;
+}
+
+#scrollWithoutBars .scroll-bar: vertical{
+    -fx-pref-width: 1;
+    -fx-opacity: 0;
+}
+VBox .scroll-bar: horizontal{
+    -fx-pref-height: 1;
+    -fx-opacity: 0;
+}
+
+VBox .scroll-bar: vertical{
+    -fx-pref-width: 1;
+    -fx-opacity: 0;
+}

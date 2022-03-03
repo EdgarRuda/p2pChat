@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/p2pChat/P2PchatClient/P2PchatClient.iml" filepath="$PROJECT_DIR$/p2pChat/P2PchatClient/P2PchatClient.iml" />
+      <module fileurl="file://$PROJECT_DIR$/p2pChat/P2PchatServer/demo.iml" filepath="$PROJECT_DIR$/p2pChat/P2PchatServer/demo.iml" />
+    </modules>
+  </component>
+</project>
