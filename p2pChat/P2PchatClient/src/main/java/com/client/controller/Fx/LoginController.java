@@ -2,7 +2,7 @@ package com.client.controller.Fx;
 
 
 import com.client.Launcher;
-import com.client.Model.ServerData;
+import com.client.Model.Server;
 import com.client.controller.Server.ServerController;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -25,12 +25,6 @@ public class LoginController {
 
 
     public void tryToLogin() throws IOException {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                 connectToServer();
-            }
-        }).start();
 
         openMainChat();
     }
@@ -40,7 +34,7 @@ public class LoginController {
     }
 
     private void connectToServer(){
-        serverController =  new ServerController(ServerData.IP, ServerData.PORT, userName.getText());
+        serverController =  new ServerController(Server.IP, Server.PORT, userName.getText());
     }
 
     private void openMainChat() throws IOException {

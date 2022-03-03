@@ -1,7 +1,9 @@
 package com.client.controller.Fx;
 
 
+import com.client.Model.User;
 import com.client.controller.Server.ServerController;
+import com.client.controller.Server.UdpController;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -16,8 +18,8 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
 
-import java.io.*;
-import java.net.Socket;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -38,6 +40,8 @@ public class MainChatController implements Initializable {
     public Label userNameLabel;
 
     private ServerController serverController;
+    private UdpController udpController;
+    private User userToChat;
     private String userName;
 
 
@@ -52,7 +56,7 @@ public class MainChatController implements Initializable {
 
 
 
-    public void sendMessage(ActionEvent event) {
+    public void sendMessage(ActionEvent event) throws Exception {
         String messageToSend = messageField.getText();
 
         if (!messageToSend.isEmpty()) {
@@ -68,11 +72,28 @@ public class MainChatController implements Initializable {
 
             messageField.clear();
 
+            udpController.sendData(userToChat, messageToSend);
 
         }
     }
 
-
+    public void listenForMessage(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                try {
+                    DatagramPacket receivePackage = new DatagramPacket(new byte[1024],
+                            1024, InetAddress.getByName(userToChat.getIp()), userToChat.getPort());
+                    udpController.getSocket().receive(receivePackage);
+                    displayMessage(new String(receivePackage.getData(), 0, receivePackage.getLength()), messagesBox);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                }
+            }
+        }).start();
+    }
     private  void displayMessage(String message, VBox messagesBox) {
 
         Text text = new Text(message);
@@ -97,7 +118,14 @@ public class MainChatController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-
+        udpController =  new UdpController();
+        userToChat = new User("second user", 111);
+        try {
+            udpController.getUdpData(userToChat);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        listenForMessage();
     }
 
     public void testMessage(ActionEvent event) {
