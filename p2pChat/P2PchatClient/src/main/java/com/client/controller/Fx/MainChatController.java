@@ -1,6 +1,7 @@
-package com.client.controller;
+package com.client.controller.Fx;
 
 
+import com.client.controller.Server.ServerController;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -15,6 +16,8 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
 
+import java.io.*;
+import java.net.Socket;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -34,9 +37,8 @@ public class MainChatController implements Initializable {
     @FXML
     public Label userNameLabel;
 
-
+    private ServerController serverController;
     private String userName;
-    private int roomNumber;
 
 
     public void setUserName(String userName) {
@@ -44,10 +46,10 @@ public class MainChatController implements Initializable {
         userNameLabel.setText(userName);
     }
 
-    public void setRoomNumber(int roomNumber) {
-        roomNumberLabel.setText(String.valueOf(roomNumber));
-        this.roomNumber = roomNumber;
+    public void setServerController(ServerController serverController){
+        this.serverController = serverController;
     }
+
 
 
     public void sendMessage(ActionEvent event) {
