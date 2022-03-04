@@ -14,7 +14,18 @@
    <children>
       <ScrollPane layoutY="60.0" minWidth="-Infinity" mouseTransparent="true" prefHeight="391.0" prefWidth="160.0" stylesheets="@styles.css">
          <content>
-            <VBox fx:id="usersBox" layoutY="60.0" maxWidth="-Infinity" minHeight="-Infinity" mouseTransparent="true" prefHeight="390.0" prefWidth="160.0" />
+            <VBox fx:id="usersBox" layoutY="60.0" maxWidth="-Infinity" minHeight="-Infinity" mouseTransparent="true" prefHeight="390.0" prefWidth="160.0">
+               <children>
+                  <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="70.0" prefWidth="160.0">
+                     <children>
+                        <Label layoutX="18.0" layoutY="17.0" prefHeight="37.0" prefWidth="124.0" text="username">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </Pane>
+               </children></VBox>
          </content>
          <opaqueInsets>
             <Insets />
@@ -35,11 +46,11 @@
       </Pane>
       <TextField fx:id="messageField" layoutX="172.0" layoutY="401.0" onKeyPressed="#sendMessageOnEnter" prefHeight="35.0" prefWidth="413.0">
          <font>
-            <Font size="16.0" />
+            <Font size="14.0" />
          </font></TextField>
-      <Button fx:id="sendButton" layoutX="586.0" layoutY="401.0" onAction="#sendMessage" text="send">
+      <Button fx:id="sendButton" layoutX="586.0" layoutY="401.0" onAction="#sendMessage" prefHeight="35.0" prefWidth="49.0" text="send">
          <font>
-            <Font size="16.0" />
+            <Font size="14.0" />
          </font>
          <opaqueInsets>
             <Insets bottom="100.0" left="100.0" right="100.0" top="100.0" />

@@ -8,6 +8,7 @@ import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 
+
 public class ClientHandler implements Runnable {
 
 
@@ -25,32 +26,22 @@ public class ClientHandler implements Runnable {
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             user = new User();
 
-            this.user.setName(bufferedReader.readLine());
-            this.user.setPort(Integer.parseInt(bufferedReader.readLine()));
+            user.setName(bufferedReader.readLine());
+            user.setPort(Integer.parseInt(bufferedReader.readLine()));
+            user.setIp(String.valueOf(socket.getRemoteSocketAddress())); //?????
 
             System.out.println(user.getName());
             System.out.println(user.getPort());
 
             clientHandlers.add(this);
-            //broadcastMessage("Server: " + clientUsername + " has entered the chat.");
-            iterateUsers();
+
+
         } catch (IOException e) {
             closeEverything(socket, bufferedReader, bufferedWriter);
 
         }
     }
 
-    private void requestConnectionBetweenUsers(String recepient){
-        for (ClientHandler clientHandler : clientHandlers) {
-
-        }
-    }
-
-    private void iterateUsers(){
-       if(clientHandlers.size()>1){
-
-       }
-    }
     @Override
     public void run() {
 
@@ -59,9 +50,12 @@ public class ClientHandler implements Runnable {
         while (socket.isConnected()) {
             try {
                 messageFromClient = bufferedReader.readLine();
+
+                //message types
+                //CONTACTS user - send back data of everyone online
+                //CONNECT + user name - send back data of another users port and ip
                 if(messageFromClient.contains("CONNECT")){
-                    System.out.println(messageFromClient.substring(7));
-                    requestConnectionBetweenUsers(messageFromClient.substring(7));
+
                 }
                 System.out.println(messageFromClient);
             } catch (IOException e) {
@@ -72,19 +66,6 @@ public class ClientHandler implements Runnable {
 
     }
 
-//    public void broadcastMessage(String messageToSend) {
-//        for (ClientHandler clientHandler : clientHandlers) {
-//            try {
-//                if (!clientHandler.clientUsername.equals(clientUsername)) {
-//                    clientHandler.bufferedWriter.write(messageToSend);
-//                    clientHandler.bufferedWriter.newLine();
-//                    clientHandler.bufferedWriter.flush();
-//                }
-//            } catch (IOException e) {
-//                closeEverything(socket, bufferedReader, bufferedWriter);
-//            }
-//        }
-//    }
 
     public void removeClientHandler() {
         clientHandlers.remove(this);

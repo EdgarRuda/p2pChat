@@ -36,7 +36,6 @@ public class ServerController {
 
     public void sendToServer(String message) throws IOException {
 
-        //message += "\n";
         bufferedWriter.write(message);
         bufferedWriter.newLine();
         bufferedWriter.flush();
@@ -69,7 +68,7 @@ public class ServerController {
                 while (socket.isConnected()) {
                     try {
                         messageFromServer = bufferedReader.readLine();
-                        System.out.println(messageFromServer);
+
                     } catch (IOException e) {
                         closeEverything(socket, bufferedReader, bufferedWriter);
                     }
