@@ -12,11 +12,23 @@ import java.nio.charset.StandardCharsets;
 public class UdpController {
 
     private DatagramSocket userSocket;
-    private int udpPort = 8000;
-
+    private int udpPort = 8001;
+    private int holePunchPort;
     public DatagramSocket getSocket(){
         return userSocket;
     }
+
+
+
+    public int openUdpSocket() throws SocketException {
+        userSocket =  new DatagramSocket();
+        return userSocket.getLocalPort();
+    }
+
+    private void spamUdpSocket() throws Exception{
+        DatagramPacket temp = new DatagramPacket(new byte[1],1, InetAddress.getByName("0.0.0.0"), udpPort );
+    }
+
     public void sendData(User user, String message) throws Exception {
         byte[] data = message.getBytes(StandardCharsets.UTF_8);
         DatagramPacket sendPacket = new DatagramPacket(data,
@@ -35,7 +47,8 @@ public class UdpController {
 
     public void getUdpData(User user) throws Exception {
 
-        DatagramSocket clientSocket = new DatagramSocket();;
+        DatagramSocket clientSocket = new DatagramSocket();
+        ;
         byte[] sendData = BigInteger.valueOf(user.getUserID()).toByteArray();
 
         DatagramPacket sendPacket = new DatagramPacket(sendData,
@@ -45,6 +58,7 @@ public class UdpController {
         DatagramPacket receivePacket = new DatagramPacket(new byte[1024], 1024);
         clientSocket.receive(receivePacket);
 
+
         String response = new String(receivePacket.getData());
         String[] splitResponse = response.split("-");
         InetAddress ip = InetAddress.getByName(splitResponse[0].substring(1));
@@ -53,11 +67,12 @@ public class UdpController {
         user.setIp(splitResponse[0].substring(1));
         user.setPort(port);
 
-        int localPort = clientSocket.getLocalPort();
+        holePunchPort = clientSocket.getLocalPort();
         clientSocket.close();
-        userSocket = new DatagramSocket(localPort);
 
+        userSocket = new DatagramSocket(holePunchPort);
+
+    }
 
 
     }
-}

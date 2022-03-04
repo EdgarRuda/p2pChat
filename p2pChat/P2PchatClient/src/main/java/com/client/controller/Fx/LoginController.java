@@ -4,6 +4,7 @@ package com.client.controller.Fx;
 import com.client.Launcher;
 import com.client.Model.Server;
 import com.client.controller.Server.ServerController;
+import com.client.controller.Server.UdpController;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -12,6 +13,9 @@ import javafx.stage.Stage;
 
 
 import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
 
 
 public class LoginController {
@@ -21,20 +25,24 @@ public class LoginController {
     public TextField userName;
 
     private ServerController serverController;
+    private  UdpController udpController;
     private static boolean loginStatus = false;
 
 
-    public void tryToLogin() throws IOException {
-
+    public void tryToLogin() throws Exception {
+        connectToServer();
         openMainChat();
     }
 
-    private void coonectToServer(){
 
-    }
 
-    private void connectToServer(){
+
+    private void connectToServer() throws IOException {
+
         serverController =  new ServerController(Server.IP, Server.PORT, userName.getText());
+        udpController =  new UdpController();
+
+        serverController.sendToServer(String.valueOf(udpController.openUdpSocket()));
     }
 
     private void openMainChat() throws IOException {

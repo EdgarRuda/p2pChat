@@ -1,7 +1,12 @@
 package com.client.controller.Server;
 
+import com.client.Model.User;
+
 import java.io.*;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Scanner;
 
 public class ServerController {
@@ -11,15 +16,30 @@ public class ServerController {
     private BufferedWriter bufferedWriter;
     private String username;
 
+
+
     public ServerController(String ip, int port, String username) {
         try {
             this.socket = new Socket(ip, port);
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.username = username;
+
+            sendToServer(username);
+            bufferedWriter.flush();
+            listenFromServer();
+
         } catch (IOException e) {
             closeEverything(socket, bufferedReader, bufferedWriter);
         }
+    }
+
+    public void sendToServer(String message) throws IOException {
+
+        //message += "\n";
+        bufferedWriter.write(message);
+        bufferedWriter.newLine();
+        bufferedWriter.flush();
     }
 
     public void sendToServer(){
@@ -44,12 +64,12 @@ public class ServerController {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                String msgFromGroupChat;
+                String messageFromServer;
 
                 while (socket.isConnected()) {
                     try {
-                        msgFromGroupChat = bufferedReader.readLine();
-                        System.out.println(msgFromGroupChat);
+                        messageFromServer = bufferedReader.readLine();
+                        System.out.println(messageFromServer);
                     } catch (IOException e) {
                         closeEverything(socket, bufferedReader, bufferedWriter);
                     }

@@ -11,13 +11,16 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.URL;
@@ -38,6 +41,8 @@ public class MainChatController implements Initializable {
     public VBox usersBox;
     @FXML
     public Label userNameLabel;
+    @FXML
+    public ScrollPane one;
 
     private ServerController serverController;
     private UdpController udpController;
@@ -53,26 +58,31 @@ public class MainChatController implements Initializable {
     public void setServerController(ServerController serverController){
         this.serverController = serverController;
     }
+    public void setUdpController(UdpController udpController) { this.udpController = udpController;}
 
+    public void sendMessageOnEnter(KeyEvent keyEvent) throws IOException {
+        if(keyEvent.getText().equals("\r"))
+            sendMessage();
+    }
 
-
-    public void sendMessage(ActionEvent event) throws Exception {
+    public void sendMessage() throws IOException {
         String messageToSend = messageField.getText();
-
         if (!messageToSend.isEmpty()) {
             Text text = new Text(messageToSend);
             TextFlow textFlow = new TextFlow(text);
-            textFlow.setStyle("-fx-color: rgb(239,242,255); -fx-background-color: rgb(15,125,242);");
+            textFlow.setId("userTextFlow");
 
             HBox hbox = new HBox();
+            hbox.setId("hbox");
             hbox.setAlignment(Pos.CENTER_RIGHT);
             hbox.getChildren().add(textFlow);
 
             messagesBox.getChildren().add(hbox);
 
-            messageField.clear();
 
-            udpController.sendData(userToChat, messageToSend);
+            messageField.clear();
+            serverController.sendToServer(messageToSend);
+            //udpController.sendData(userToChat, messageToSend);
 
         }
     }
@@ -98,9 +108,10 @@ public class MainChatController implements Initializable {
 
         Text text = new Text(message);
         TextFlow textFlow = new TextFlow(text);
-        textFlow.setStyle("-fx-color: rgb(239,242,255); -fx-background-color: rgb(155,125,242);");
-
+        textFlow.setId("clientTextFlow");
         HBox hbox = new HBox();
+        hbox.setId("hbox");
+
         hbox.setAlignment(Pos.CENTER_LEFT);
         hbox.getChildren().add(textFlow);
 
@@ -115,20 +126,29 @@ public class MainChatController implements Initializable {
 
     }
 
+    private void askForConnection() throws IOException {
+        serverController.sendToServer("CONNECT " + "user2");
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        udpController =  new UdpController();
+
         userToChat = new User("second user", 111);
-        try {
-            udpController.getUdpData(userToChat);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        listenForMessage();
+
+//        try {
+//            udpController.getUdpData(userToChat);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        listenForMessage();
+
+
     }
 
     public void testMessage(ActionEvent event) {
         displayMessage("test", messagesBox);
     }
+
+
+
 }
