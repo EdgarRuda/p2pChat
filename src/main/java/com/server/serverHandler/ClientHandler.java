@@ -5,13 +5,35 @@ import com.server.models.ContactModel;
 import com.server.services.ContactService;
 import com.server.services.UserService;
 import com.server.models.UserModel;
+import org.apache.log4j.Logger;
 
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The main functioning class of the application
+ * There are two main storage solutions:
+ * 1. One is the userList, that stores the online users. This is required for message sending between logged in clients
+ * 2. Main storage where the userModel, that is essentially userData is stored and another table that has linked contacts
+ *
+ * The class has two main operating blocks:
+ * 1. The first is the ClientHandler constructor, that takes the logged-in users information and stores it into userList
+ * 2. The second is the run() method, that acts as a switch statement that takes in messages from the server interprets
+ * them and sends another one back
+ *
+ * The application of the switch statement can be seen in the final String section with LOG_USER, REG_USER, etc.
+ *
+ * The Client handler operates on a Thread therefore the socket bufferedReader and bufferedWriter need to be maintained
+ * via the close everything method.
+ *
+ * closeEverything also clears up the ipAddresses of users that were logged in essence securing their data.
+ */
 public class ClientHandler implements Runnable {
+
+    private final Logger logger = Logger.getLogger(this.getClass());
+
     public static ArrayList<ClientHandler> userList = new ArrayList<>();
     private String clientUsername;
 
@@ -84,17 +106,15 @@ public class ClientHandler implements Runnable {
             String userIPNotParsed = String.valueOf(socket.getInetAddress());
             userIP = userIPNotParsed.substring(1);
             while(!isLoggedIn) {
-                String messageLOGorREG = bufferedReader.readLine();
-
-
-                System.out.println("Message received from Client: " + messageLOGorREG);
+                String clientMessage = bufferedReader.readLine();
+                logger.info("Message received form Client "+ currentUser.getUserName() +": " + clientMessage);
 
                 String[] loginMessage = new String[3];   //Make the index free
                 try {
-                    loginMessage = messageLOGorREG.split("_");
+                    loginMessage = clientMessage.split("_");
 
                 } catch (Exception e) {
-                    System.err.println("Message String not parsed Correctly");
+                    logger.error("Message String not parsed Correctly");
                 }
 
 
@@ -117,7 +137,7 @@ public class ClientHandler implements Runnable {
             }
 
         } catch (IOException e) {
-            System.err.println("ERROR: LOG_USER or REG_USER Message Received Incorrectly.");
+            logger.error("LOG_USER or REG_USER Message Received Incorrectly.");
             closeEverything(socket, bufferedReader, bufferedWriter);
         }
     }
@@ -131,52 +151,37 @@ public class ClientHandler implements Runnable {
 
         while (socket.isConnected()) {
             try {
-
                 //reads incoming messages via TCP from Client
                 String clientMessage = bufferedReader.readLine();
-
-                //Prints User requests from the server
-                System.out.println("Message received form Client "+ currentUser.getUserName() +": " + clientMessage);
-
-                //splits the messages to keywords NAME name PORT port IP ipAddress
+                logger.info("Message received form Client "+ currentUser.getUserName() +": " + clientMessage);
                 String[] message = clientMessage.split("_");
-
 
                 switch(message[0]) {
 
                     case LOG_USER:
-
                         logInUser(userServiceGLBL, message);
                         break;
 
                     case REG_USER:
-
                         registerUser(userServiceGLBL, message);
                         break;
 
                     case USR_REQUEST:
-
                         requestUser(message);
                         break;
 
                     case PING:
-
-                        System.out.println(currentUser.getUserName() + " Pinged");
                         break;
 
                     case SEARCH:
-
                         searchForUsers(message);
                         break;
 
                     case FRIENDS:
-
                         sendContactsToClient();
                         break;
 
                     case PORT:
-
-                        //userServiceGLBL.updateUserPortAndIpAddress(currentUser, Integer.valueOf(message[1]), userIP, currentUser.getId());
                         sendMessageToOtherOnlineUser("PRT_" + currentUser.getUserName() + "_" + message[2] ,message[1]);
                         break;
 
@@ -193,7 +198,7 @@ public class ClientHandler implements Runnable {
 
                     default:
 
-                        System.err.println("Something is wrong with the Message_types");
+                        logger.error("Something is wrong with the Message_types");
                         sendToUser("Something is wrong with the Message_types");
                         break;
 
@@ -209,14 +214,10 @@ public class ClientHandler implements Runnable {
     }
 
 
-    public void addContact(UserModel userModel, String name, String status) {
-
-        ContactModel contactModel = new ContactModel(null, name, status, userModel);
-
-        contactServiceGLBL.addContact(contactModel, userModel);
-
-    }
-
+    /**
+     * @param name specifies the username to which the message is sent to
+     * @param status specifies the status that must be placed: pending, accepted, blocked
+     */
     public void sendContactToOtherUsersContactList(String name, String status) {
 
         String nameToAdd = currentUser.getUserName();
@@ -227,11 +228,16 @@ public class ClientHandler implements Runnable {
 
         contactServiceGLBL.addContact(contactModel, userToSendTo);
 
-        System.out.println("Client: " + currentUser.getUserName() + " was added with status: " + status + " to user: " + userToSendTo);
+        logger.info("Client: " + currentUser.getUserName() + " was added with status: " + status + " to user: " + userToSendTo);
 
     }
 
 
+    /**
+     * @param userService specifies that the user service will be called in this method
+     * @param message is the input from client that is processed. Index 1 is: the client name Index 2 is: the password
+     * @throws IOException because of the use of bufferedWriter to send the response to client.
+     */
     public void logInUser(UserService userService, String[] message) throws IOException {
 
         try {
@@ -243,41 +249,49 @@ public class ClientHandler implements Runnable {
                 userList.add(this);
                 sendToUser("LOG_TRUE");
                 isLoggedIn=true;
+                logger.info("User " + message[1] + " logged in.");
             } else {
                 sendToUser("LOG_FALSE");
             }
         } catch (Exception e) {
             sendToUser("LOG_FALSE");
-            System.err.println("Exception while logging in a User: " + message[1]);
+            logger.error("Exception while logging in a User: " + message[1]);
         }
 
 
     }
 
 
+    /**
+     * @param userService specifies that the user service will be called in this method
+     * @param message is the input from client that is processed. Index 1 is: the client name Index 2 is: the password
+     * @throws IOException because of the use of bufferedWriter to send the response to client.
+     */
     public void registerUser(UserService userService, String[] message) throws IOException {
         try {
             //Sets the user to be with the unhashed password
             currentUser = new UserModel(null, message[1], null, userIP, message[2]);
-            System.out.println("1. REG PWD: " + currentUser.getPassword());
             //Adds the user and hashes the password
             userService.addUser(currentUser);
             //Receives the user userModel with the hashed password version
             currentUser = userService.findUserModelByName(message[1]);
-            System.out.println("2. REG PWD: " + currentUser.getPassword());
             this.clientUsername = currentUser.getUserName();
             userList.add(this);
             isLoggedIn=true;
             sendToUser("REG_TRUE");
+            logger.info("User " + message[1] + " registered.");
         } catch (Exception e) {
             sendToUser("REG_FALSE");
-            System.err.println("Exception while registering a new User " + message[1]);
+            logger.error("Exception while registering a new User " + message[1]);
         }
     }
 
 
+    /**
+     * @param message is the input from client that is processed. Index 1 is: the client name
+     * @throws IOException because of the use of bufferedWriter to send the response to client.
+     */
     public void requestUser(String[] message) throws IOException {
-
         //Finds the user
         String response;
         try {
@@ -293,10 +307,16 @@ public class ClientHandler implements Runnable {
             response = "USR_" + message[1] + "_FAILED";
         }
         sendToUser(response);
-        System.out.println("Sending USR response: " + response);
+        logger.info("Sending REQUEST_USER response: " + response);
 
     }
 
+
+    /**
+     * @param message is the input from client that is processed. Index 1 is: part of the username that the client is
+     *              searching for
+     * @throws IOException because of the use of bufferedWriter to send the response to client.
+     */
     public void searchForUsers(String[] message) throws IOException {
         try {
             String userStringToSend = "SRH";
@@ -309,25 +329,34 @@ public class ClientHandler implements Runnable {
                 }
                 sendToUser(userStringToSend);
             }
-            System.out.println("SEARCH: User List sent to user " + currentUser.getUserName());
+            logger.info("SEARCH: User List sent to user " + currentUser.getUserName());
         } catch (Exception e) {
-            System.err.println("SRH failed: No user by the name: " + message[1]);
+            logger.error("SRH failed: No user by the name: " + message[1]);
             sendToUser("SRH_FALSE");
         }
     }
 
 
+    /**
+     * @param message specifies the message that has to be sent to client.
+     * @throws IOException because of the use of bufferedWriter to send the response to client.
+     */
     public void sendToUser(String message) throws IOException {
         try {
             bufferedWriter.flush();
             bufferedWriter.write(message);
             bufferedWriter.newLine();
             bufferedWriter.flush();
-        } catch (IOException e) {
+        } catch (IOException ignored) {
 
         }
     }
 
+    /**
+     * @param message is the input from client that is processed. Index 1 is: the username that has to be added Index 2
+     *                is: an identifier either TRUE if the user should be placed as a contact or FALSE if the user
+     *                should be blocked.
+     */
     public void addContact(String[] message) {
 
         if (message.length == 2) {
@@ -354,20 +383,28 @@ public class ClientHandler implements Runnable {
             sendMessageToOtherOnlineUser("ADD_" + currentUser.getUserName() + "_FALSE", message[1]);
 
         } else {
-            System.err.println("Something wrong with the addContact() method");
+            logger.error("Something wrong with the addContact() method");
         }
 
 
     }
 
+    /**
+     * Clears up user data form the DB so that the user will not be viewed as active on other clients.
+     */
     public void exitCleanup() {
 
         if (currentUser != null) {
         userServiceGLBL.updateUserPortAndIpAddress(currentUser, null, null, currentUser.getId());
-        System.err.println("User " + currentUser.getUserName() + " had his port and IP removed form DB" ); }
+        logger.error("User " + currentUser.getUserName() + " had his port and IP removed form DB" ); }
 
     }
 
+    /**
+     * This method sends all contacts to client - those that he/she himself/herself issued or those that we sent from
+     * other users.
+     * @throws IOException because of the use of bufferedWriter to send the response to client.
+     */
     public void sendContactsToClient() throws IOException {
         List<ContactModel> contacts = contactServiceGLBL.getAllContactsByUserModelId(currentUser.getId());
 
@@ -390,14 +427,16 @@ public class ClientHandler implements Runnable {
     }
 
 
+    /**
+     * @param messageToSend is the message that will be sent to another user.
+     * @param userName is the user that will receive the sent message.
+     */
     public void sendMessageToOtherOnlineUser(String messageToSend, String userName) {
 
         for (ClientHandler clientHandler : userList) {
 
             try {
-                if (clientHandler.clientUsername == null || clientHandler.clientUsername.isEmpty()) {
-
-                } else {
+                if (clientHandler.clientUsername != null && !clientHandler.clientUsername.isEmpty()) {
 
                 if (clientHandler.clientUsername.equals(userName) && !clientHandler.clientUsername.equals(currentUser.getUserName())) {
                     clientHandler.bufferedWriter.flush();
@@ -406,13 +445,16 @@ public class ClientHandler implements Runnable {
                     clientHandler.bufferedWriter.flush();
                 } }
 
-            } catch (IOException e) {
-                System.out.println("PROBLEM SENDING THE MESSAGE TO OTHER USER");
-                //closeEverything(socket, bufferedReader, bufferedWriter);
+            } catch (IOException ignored) {
             }
         }
     }
 
+    /**
+     * @param socket receives the currently used socket in order to close it down
+     * @param bufferedReader receives the currently used reader in order to close it down
+     * @param bufferedWriter receives the currently used writer in order to close it down
+     */
     public void closeEverything(Socket socket, BufferedReader bufferedReader, BufferedWriter bufferedWriter) {
 
         try {

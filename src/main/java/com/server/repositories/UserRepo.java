@@ -8,6 +8,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * A repository that links with JPA repository used to form Queries for data fetching from the DB.
+ */
 @Repository
 public interface UserRepo extends JpaRepository<UserModel, Integer> {
 

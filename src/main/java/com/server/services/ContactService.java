@@ -8,14 +8,24 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * This class determines data fetching and placing logic with the DB and ClientHandler.
+ */
 @Service
 public class ContactService {
 
     private final ContactRepo contactRepo;
 
+    /**
+     * @param contactRepo instantiates the constructor with the user repository.
+     */
     @Autowired
     public ContactService(ContactRepo contactRepo) {this.contactRepo = contactRepo;}
 
+    /**
+     * @param contactModel adds the provided contact to the contact table.
+     * @param userModel receives the user by which the contact must be added.
+     */
     public void addContact(ContactModel contactModel, UserModel userModel) {
         //We need a list of all contacts, so we could iterate through them checking if there are no duplicates
         try {
@@ -31,6 +41,11 @@ public class ContactService {
         }
     }
 
+
+    /**
+     * @param contactModel receives the contact model to edit its status
+     * @param status provided the status condition.
+     */
     public void updateContactStatus(ContactModel contactModel, String status) {
         contactModel.setStatus(status);
         contactRepo.save(contactModel);
@@ -48,15 +63,5 @@ public class ContactService {
     public List<ContactModel> getContactModelByUserModelIdAndStatus(String userName, String status) {
         return contactRepo.findContactModelByContactNameAndStatus(userName, status);
     }
-
-
-    // getAllContactContacts()
-    // getAllBlockedContacts()
-
-    //We are going to use the above methods to send info about users to the clientApp
-
-
-
-
 
 }

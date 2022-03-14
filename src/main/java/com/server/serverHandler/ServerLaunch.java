@@ -12,6 +12,11 @@ import java.net.ServerSocket;
 import java.util.List;
 
 
+/**
+ * The ServerLaunch class opens the main socket to where the incoming connection will be processed.
+ * ghostUserCleanup() is required so that in case the server crashes all data of the users is cleared up
+ * because users Online status is determined by of the IP address or Port is present on the database.
+ */
 @Component
 public class ServerLaunch {
 
@@ -22,7 +27,10 @@ public class ServerLaunch {
         this.userService = userService;
         this.contactService = contactService;
     }
-    //Our Main Method
+
+    /**
+     * @throws IOException because of the open socket.
+     */
     @Autowired
     public void LaunchServer() throws IOException {
 
@@ -36,7 +44,9 @@ public class ServerLaunch {
     }
 
 
-    // if server crashes unexpectedly, some user data is not cleaned up - this method clears up the table at launch
+    /**
+     * If server crashes unexpectedly, some user data is not cleaned up - this method clears up the table at launch
+     */
     public void ghostUserCleanup() {
 
         List<UserModel> onlineUsers = userService.findAllOnlineUsers();

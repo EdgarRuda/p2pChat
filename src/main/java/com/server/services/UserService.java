@@ -7,11 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.List;
 
 
+/**
+ * This class determines data fetching and placing logic with the DB and ClientHandler.
+ * Implements password hashing.
+ */
 @Service
 public class UserService {
 
@@ -19,38 +21,58 @@ public class UserService {
 
     private final UserRepo userRepo;
 
-    //Autowired UserRepo
+
+    /**
+     * @param userRepo returns information from the userRepository
+     */
     @Autowired
     public UserService(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
 
-    //Checks if the passwords are the same
+
+    /**
+     * @param userModel refers to the user on which this method is applied.
+     * @param providedPassword uses the provided password.
+     * @return returns a boolean true of the password is correct.
+     */
     public boolean checkPassword(UserModel userModel, String providedPassword){
         return bCryptPasswordEncoder.matches(providedPassword, userModel.getPassword());
     }
 
-    //Hashes the password when called
+
+    /**
+     * @param userModel refers to the user on which this method is applied.
+     * @param password accepts the password input.
+     */
     public void hashPassword(UserModel userModel, String password) {
         String hashedPassword = bCryptPasswordEncoder.encode(userModel.getPassword());
         userModel.setPassword(hashedPassword);
     }
 
-    //Adds a user with a Hashed password
+
+    /**
+     * @param userModel refers to the user on which this method is applied.
+     */
     public void addUser(UserModel userModel) {
         hashPassword(userModel, userModel.getPassword());
         userRepo.save(userModel);
         System.err.println("User: " + userModel.getUserName() + " with port: " + userModel.getPortNumber() + " has been added.");
     }
 
-    public List<UserModel> findAllUsers() {return userRepo.findAll();}
 
     public List<UserModel> findAllOnlineUsers() {return userRepo.findByIpAddressContains(".");}
 
-    //Finds all users
+
     public List<UserModel> findUsersWithPartOfName(String username) {
         return userRepo.findByUserNameStartingWith(username);}
 
+    /**
+     * @param userModel refers to the user on which this method is applied.
+     * @param portNumber applies the given port number to the chosen client.
+     * @param ipAddress applies the given ipAddress number to the chosen client.
+     * @param prevId takes the previous ID of the user in order to update it.
+     */
     public void updateUserPortAndIpAddress(UserModel userModel, Integer portNumber, String ipAddress, Integer prevId) {
         userModel.setId(prevId);
         userModel.setIpAddress(ipAddress);
@@ -60,17 +82,15 @@ public class UserService {
     }
 
 
-    public UserModel findUserById(Integer id) {
-        return userRepo.findUserModelById(id)
-                .orElseThrow(() -> new UserNotFoundException("User by id: " + id + " not found."));
-    }
-
+    /**
+     * @param userName takes the userName that has to be returned.
+     * @return returns the user from the database.
+     */
     public UserModel findUserModelByName(String userName) {
         return userRepo.findUserModelByUserName(userName)
                 .orElseThrow(() -> new UserNotFoundException("User by the name "+userName+" not found"));
     }
 
-    public void deleteUser(Integer id){userRepo.deleteUserById(id);}
 
 
 }

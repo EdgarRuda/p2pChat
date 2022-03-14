@@ -4,6 +4,11 @@ package com.server.models;
 import javax.persistence.*;
 import java.io.Serializable;
 
+/**
+ * Base entity formation for user contacts.
+ * The table is auto-generated within PostgreSQL (check resources/application.properties to set up your postgres id
+ * and password.
+ */
 @Entity
 @Table(name = "contact_model")
 public class ContactModel implements Serializable {
