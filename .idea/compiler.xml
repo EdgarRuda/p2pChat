@@ -13,7 +13,7 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="demo" target="11" />
-      <module name="P2PchatClient" target="11" />
+      <module name="P2PchatClient" target="17.0.2" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
