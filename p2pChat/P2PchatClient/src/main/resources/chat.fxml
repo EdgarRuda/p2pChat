@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+
+<GridPane stylesheets="noFocus.css" prefHeight="400.0" prefWidth="400.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.client.mainFrameController.ChatController">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+                </columnConstraints>
+                <rowConstraints>
+                    <RowConstraints vgrow="ALWAYS" />
+                    <RowConstraints maxHeight="50.0" minHeight="50.0" prefHeight="50.0" vgrow="NEVER" />
+                </rowConstraints>
+                <children>
+                    <ScrollPane fx:id="chatScroll" hbarPolicy="NEVER" prefHeight="390.0" prefWidth="400.0"  stylesheets="styles.css" vbarPolicy="NEVER">
+                        <content>
+                            <VBox fx:id="messageBox" alignment="TOP_CENTER" prefHeight="400.0" prefWidth="400.0" />
+                        </content>
+                    </ScrollPane>
+                    <GridPane GridPane.rowIndex="1">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="ALWAYS" />
+                            <ColumnConstraints hgrow="ALWAYS" maxWidth="57" minWidth="57.0" prefWidth="57.0" />
+                        </columnConstraints>
+                        <rowConstraints>
+                            <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="NEVER" />
+                        </rowConstraints>
+                        <children>
+                            <Button mnemonicParsing="false" onAction="#sendMessage" prefHeight="25.0" prefWidth="59.0" text="send" GridPane.columnIndex="1">
+                                <GridPane.margin>
+                                    <Insets right="10.0" top="17.0" />
+                                </GridPane.margin>
+                            </Button>
+                            <TextField fx:id="messageField" onKeyPressed="#checkForEnter">
+                                <GridPane.margin>
+                                    <Insets left="10.0" top="17.0" />
+                                </GridPane.margin>
+                            </TextField>
+                        </children>
+                    </GridPane>
+                </children>
+            </GridPane>

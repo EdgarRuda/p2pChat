@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="370.0" maxWidth="300.0" minHeight="370.0" minWidth="300.0" prefHeight="370.0" prefWidth="300.0" stylesheets="styles.css, noFocus.css" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.client.loginWindowController.LoginController">
+   <children>
+      <StackPane maxWidth="300.0" minHeight="300.0" minWidth="300.0" prefHeight="400.0" prefWidth="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+      <Pane fx:id="loginWindow" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <padding>
+            <Insets left="20.0" right="20.0" top="20.0" />
+         </padding>
+         <children>
+            <Button fx:id="loginButton" disable="true" layoutX="129.0" layoutY="155.0" mnemonicParsing="false" onAction="#loginToServer" text="login" />
+            <TextField fx:id="loginName" layoutX="85.0" layoutY="80.0" prefHeight="25.0" prefWidth="130.0" promptText="username" />
+            <PasswordField fx:id="loginPass" layoutX="85.0" layoutY="115.0" prefHeight="25.0" prefWidth="130.0" promptText="password" />
+            <Label layoutX="132.0" layoutY="40.0" text="LOGIN"  />
+            <Button fx:id="goToRegButton" layoutX="122.0" layoutY="188.0" mnemonicParsing="false" onAction="#toRegister" text="register" />
+            <Button layoutX="127.0" layoutY="250.0" mnemonicParsing="false" onAction="#toDirect" text="direct" />
+            <Label fx:id="serverStatus" alignment="CENTER" contentDisplay="CENTER" layoutY="290.0" prefHeight="17.0" prefWidth="300.0" text="..." />
+            <Pane fx:id="redoIcon" layoutX="139.0" layoutY="308.0" onMouseClicked="#resetConnection" prefHeight="24.0" prefWidth="23.0">
+               <children>
+                  <ImageView fitHeight="16.0" fitWidth="13.0" layoutX="4.0" layoutY="4.0">
+                     <image>
+                        <Image url="@img/icon-redo.png" />
+                     </image>
+                  </ImageView>
+               </children>
+            </Pane>
+         </children>
+      </Pane>
+      <Pane fx:id="registrationWindow" layoutX="-300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="-299.0" AnchorPane.rightAnchor="299.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <Label layoutX="125.0" layoutY="40.0" text="REGISTER" />
+            <TextField fx:id="loginRegistration" layoutX="86.0" layoutY="80.0" prefWidth="130.0" promptText="login" />
+            <PasswordField fx:id="firstPassRegistration" layoutX="85.0" layoutY="115.0" prefWidth="130.0" promptText="password" />
+            <PasswordField fx:id="secondPassRegistration" layoutX="85.0" layoutY="150.0" prefWidth="130.0" promptText="repeat password" />
+            <Button fx:id="registerButton" disable="true" layoutX="123.0" layoutY="190.0" mnemonicParsing="false" onAction="#registerUser" text="register" />
+            <Button layoutX="131.0" layoutY="250.0" mnemonicParsing="false" onAction="#registerToLogin" text="back" />
+         </children>
+      </Pane>
+      <Pane fx:id="directWindow" layoutX="300.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="299.0" AnchorPane.rightAnchor="-299.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <Button fx:id="directConnection" layoutX="127.0" layoutY="190.0" mnemonicParsing="false" onAction="#directConnection" text="direct" />
+            <TextField fx:id="ipField" layoutX="85.0" layoutY="115.0" prefHeight="25.0" prefWidth="130.0" promptText="enter single or multiple ip;" />
+            <TextField fx:id="portField" layoutX="85.0" layoutY="150.0" prefHeight="25.0" prefWidth="130.0" promptText="50 000 - 60 000" />
+            <TextField fx:id="directUserName" layoutX="85.0" layoutY="80.0" prefHeight="25.0" prefWidth="130.0" promptText="username" />
+            <Label layoutX="91.0" layoutY="40.0" text="DIRECT CONNECTION" />
+            <Button layoutX="130.0" layoutY="250.0" mnemonicParsing="false" onAction="#directToLogin" text="back" />
+         </children>
+      </Pane>
+   </children>
+</AnchorPane>
