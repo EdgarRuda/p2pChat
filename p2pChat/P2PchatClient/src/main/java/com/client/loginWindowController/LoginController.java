@@ -177,42 +177,42 @@ public class LoginController implements Initializable {
 
         User user;
 
-//        if(loginName.getText().equals("test1")) {
-//            user = new User("test2");
-//            user.setIsConfirmed();
-//            contactList.addUser(user);
-//
-//            user = new User("test3");
-//            user.setIsInboundRequest(true);
-//            contactList.addUser(user);
-//
-//            user = new User("test4");
-//            user.setIsOutboundRequest(true);
-//            contactList.addUser(user);
-//
-//        }
-//
-//        if(loginName.getText().equals("test2")) {
-//            user = new User("test1");
-//            user.setIsConfirmed();
-//            contactList.addUser(user);
-//
-//            user = new User("test3");
-//            user.setIsConfirmed();
-//            contactList.addUser(user);
-//
-//        }
-//
-//        if(loginName.getText().equals("test3")) {
-//            user = new User("test1");
-//            user.setIsConfirmed();
-//            contactList.addUser(user);
-//
-//            user = new User("test2");
-//            user.setIsConfirmed();
-//            contactList.addUser(user);
-//
-//        }
+        if(loginName.getText().equals("test1")) {
+            user = new User("test2");
+            user.setIsConfirmed();
+            contactList.addUser(user);
+
+            user = new User("test3");
+            user.setIsInboundRequest(true);
+            contactList.addUser(user);
+
+            user = new User("test4");
+            user.setIsOutboundRequest(true);
+            contactList.addUser(user);
+
+        }
+
+        if(loginName.getText().equals("test2")) {
+            user = new User("test1");
+            user.setIsConfirmed();
+            contactList.addUser(user);
+
+            user = new User("test3");
+            user.setIsConfirmed();
+            contactList.addUser(user);
+
+        }
+
+        if(loginName.getText().equals("test3")) {
+            user = new User("test1");
+            user.setIsConfirmed();
+            contactList.addUser(user);
+
+            user = new User("test2");
+            user.setIsConfirmed();
+            contactList.addUser(user);
+
+        }
 
 //        if(loginName.getText().equals("ed1")) {
 //            user = new User("Tadas");

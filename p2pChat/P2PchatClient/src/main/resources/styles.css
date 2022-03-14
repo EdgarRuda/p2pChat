@@ -33,6 +33,9 @@
 -fx-background-color: #212121;
 }
 
+#userCircle{
+-fx-fill: #66998e;
+}
 
 
 .label{

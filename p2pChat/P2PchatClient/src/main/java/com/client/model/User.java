@@ -125,8 +125,9 @@ public class User  {
     public void displayMessage(String message){
         chatController.displayMessage(message);
     }
-    public void sendMessage(String message){
+    public void sendUdpMessage(String message){
         udpConnection.sendMessage(message);
+
     }
 
     //direct connection
@@ -193,8 +194,8 @@ public class User  {
     private UdpConnection udpConnection;
 
     private boolean isOnline;
-
     private boolean connectionPending;
+    public boolean isFocused;
 
     private Scene chatScene;
     private ChatController chatController;

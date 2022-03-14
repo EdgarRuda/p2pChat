@@ -166,6 +166,8 @@ public class MainFrameController{
                 pane = FXMLLoader.load(Objects.requireNonNull(ChatApp.class.getClassLoader().getResource("profile.fxml")));
 
                 for (Node child : pane.getChildren()) {
+                    if (child instanceof Label && child.getId().equals("userInitials"))
+                        ((Label) child).setText(contact.substring(0,1));
                     if (child instanceof Label && child.getId().equals("userName"))
                         ((Label) child).setText(contact);
                     if (child instanceof Circle && child.getId().equals("statusCircle"))
@@ -214,10 +216,7 @@ public class MainFrameController{
     }
 
     public void removeSingleUser(String userName){
-        for (Node child : contactListBox.getChildren()) {
-            if (child instanceof Label && child.getId().equals("userName"))
-                contactListBox.getChildren().remove(child);
-        }
+        contactListBox.getChildren().removeIf(child -> child instanceof Label && child.getId().equals(userName));
     }
 
     public void loadSingleContact(User user) throws IOException {
@@ -234,7 +233,8 @@ public class MainFrameController{
     private void bindUserData(User user, Pane pane){
 
         for (Node child : pane.getChildren()) {
-
+            if (child instanceof Label && child.getId().equals("userInitials"))
+                ((Label) child).setText(user.getName().substring(0,1));
             if (child instanceof Label && child.getId().equals("userName"))
                 ((Label) child).textProperty().bind(user.nameProperty());
             if (child instanceof Label && child.getId().equals("userStatus"))

@@ -2,6 +2,7 @@ module com.client{
     requires javafx.controls;
     requires javafx.fxml;
 
+
     requires validatorfx;
     requires org.kordamp.ikonli.javafx;
 

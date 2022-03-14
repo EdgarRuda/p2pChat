@@ -1,12 +1,12 @@
 package com.client.mainFrameController;
 
-import com.client.service.UdpConnection;
 import com.client.model.User;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -30,6 +30,14 @@ public class ChatController implements Initializable {
     private VBox messageBox;
     @FXML
     private TextField messageField;
+
+    //notification
+    private final String IS_OFFLINE = "user is currently offline";
+    private final String IS_IN_PENDING = "accept users request first";
+    private final String IS_OUT_PENDING = "user has not accepted your request yet";
+    private boolean notificationSend;
+
+    private boolean messageUnread;
 
     private User chatUser;
     DateFormat format = new SimpleDateFormat("HH:mm");
@@ -62,15 +70,55 @@ public class ChatController implements Initializable {
             timeHBox.getChildren().add(time);
             timeHBox.setAlignment(Pos.CENTER_RIGHT);
 
+
+            if(verifyUserStatus())
+                chatUser.sendUdpMessage(messageToSend);
+
             messageBox.getChildren().addAll(timeHBox,hbox);
             messageField.clear();
 
-            chatUser.sendMessage(messageToSend);
         }
     }
 
+    public boolean verifyUserStatus(){
+
+        if(chatUser.getIsInboundRequest()){
+            if(!notificationSend)
+                displayNotification(IS_IN_PENDING );
+        }
+        else if(chatUser.getIsOutboundRequest()){
+            if(!notificationSend)
+                displayNotification(IS_OUT_PENDING);
+        }
+        else if(!chatUser.getIsConnectionEstablished()){
+            if(!notificationSend)
+                displayNotification(IS_OFFLINE);
+        }
+        else {
+            notificationSend=false;
+            return true;
+        }
+
+        notificationSend=true;
+        return false;
+    }
+
+    public void displayNotification(String not){
+        TextFlow notification = new TextFlow(new Text(not));
+        HBox box = new HBox();
+        box.setId("hbox");
+        box.getChildren().add(notification);
+        box.setAlignment(Pos.CENTER);
+
+
+            messageBox.getChildren().addAll(box);
+
+
+    }
 
     public void displayMessage(String message) {
+
+        messageUnread= !chatUser.isFocused && !messageUnread;
 
         TextFlow textFlow = new TextFlow(new Text(message));
         textFlow.setId("clientTextFlow");
@@ -95,9 +143,7 @@ public class ChatController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        chatScroll.widthProperty().addListener(event ->{
-            messageBox.setPrefWidth(chatScroll.getWidth());
-        });
+        chatScroll.widthProperty().addListener(event -> messageBox.setPrefWidth(chatScroll.getWidth()));
 
         messageBox.heightProperty().addListener(new ChangeListener() {
 
