@@ -1,6 +1,7 @@
 package com.client.mainFrameController;
 
 import com.client.ChatApp;
+import com.client.loginWindowController.LoginController;
 import com.client.model.ContactList;
 import com.client.model.User;
 import com.client.service.TcpConnection;
@@ -13,6 +14,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
@@ -28,6 +30,8 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class MainFrameController{
+    @FXML
+    private ScrollPane scrollableLeftPane;
     @FXML
     private AnchorPane mainView;
     @FXML
@@ -52,7 +56,10 @@ public class MainFrameController{
     private boolean searchStarted;
 
 
+
     public void initUserSearch() {
+
+        scrollableLeftPane.requestFocus();
 
         searchResultBox.setTranslateX(-200);
         searchResultNotification.setVisible(false);
@@ -135,19 +142,35 @@ public class MainFrameController{
     @FXML
     public void logout() throws IOException{
         if (tcpConnection != null)
-           tcpConnection.exit();
+           tcpConnection.logout();
 
-        for (User contact : contactList.getContacts())
-            contact.closeUdpConnection();
-
+        clearContacts();
 
         FXMLLoader loader = new FXMLLoader(ChatApp.class.getResource("/login.fxml"));
         Scene scene = new Scene(loader.load());
 
-        ((Stage) mainPane.getScene().getWindow()).close();
-        Stage stage = new Stage();
+        LoginController loginController = loader.getController();
+        loginController.initTcpConnection(this.tcpConnection);
+
+        Stage stage = ChatApp.getMainStage();
+        stage.setResizable(false);
+
+        if(tcpConnection!=null)
+            stage.setOnHiding(event -> {
+                clearContacts();
+                tcpConnection.exit();
+            });
+
         stage.setScene(scene);
         stage.show();
+    }
+
+    private void clearContacts(){
+        for (User contact : contactList.getContacts()) {
+            contact.closeUdpConnection();
+        }
+
+        contactList.getContacts().clear();
     }
 
     public void displaySearchResult(ArrayList<String> searchResult) throws IOException {

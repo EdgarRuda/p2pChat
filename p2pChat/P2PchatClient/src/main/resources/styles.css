@@ -28,7 +28,8 @@
 #registrationWindow,
 #contactListBox,
 #userInfoBox,
-#searchBox
+#searchBox,
+#scrollableLeftPane
 {
 -fx-background-color: #212121;
 }
@@ -44,6 +45,23 @@
 
 .userProfiles : mouse-over{
 -fx-background-color: rgb(102, 102, 153);
+}
+
+
+
+#borderPaneScroll {
+-fx-background-color: #212121;
+-fx-border-color:#212121;
+}
+
+#borderPaneScroll : focused{
+-fx-background-color: #212121;
+-fx-border-color:#212121;
+}
+
+#borderPaneScroll .corner {
+-fx-background-color: #212121;
+-fx-border-color:#212121;
 }
 
 

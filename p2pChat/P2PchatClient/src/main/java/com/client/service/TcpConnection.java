@@ -26,12 +26,9 @@ public class TcpConnection {
     private BufferedWriter bufferedWriter;
     private ContactList contactList;
     private ArrayList<String> searchResult;
-    public Thread listener;
 
     private final SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
     private MainFrameController mainFrameController;
-
-    //Getters Setters
 
     private static final StringProperty status = new SimpleStringProperty();
 
@@ -93,9 +90,6 @@ public class TcpConnection {
         System.out.println("CONNECTION STARTED: " + status);
     }
 
-    public void setMainController(MainFrameController mainFrameController) {
-        this.mainFrameController = mainFrameController;
-    }
 
     final String LOG_USER = "LOG";
     final String REG_USER = "REG";
@@ -119,8 +113,9 @@ public class TcpConnection {
 
             setIsConnected(true);
             setStatus("connection established");
-            listener = new Thread(this::listenFromServer);
+            Thread listener = new Thread(this::listenFromServer);
             listener.start();
+            setConnectionStarted(false);
 
 
         } catch (IOException e) {
@@ -128,12 +123,18 @@ public class TcpConnection {
         }
     }
 
-    public void timeStamp() {
-        System.out.print("[" + format.format(new Date()) + "] ");
-    }
-
+    //Getters & Setters
     public void setContactsModel(ContactList contactList) {
         this.contactList = contactList;
+    }
+
+    public void setMainController(MainFrameController mainFrameController) {
+        this.mainFrameController = mainFrameController;
+    }
+    //
+
+    public void timeStamp() {
+        System.out.print("[" + format.format(new Date()) + "] ");
     }
 
     public void tryToLogin(String userName, String password) throws SocketException {
@@ -155,7 +156,7 @@ public class TcpConnection {
         sendToServer(SEARCH + "_" + userName);
     }
 
-    public void friendRequest(String userName) throws SocketException {
+    public void friendRequest(String userName) {
         timeStamp();
         System.out.println(ADD + "_" + userName);
         sendToServer(ADD + "_" + userName);
@@ -168,92 +169,94 @@ public class TcpConnection {
         sendToServer(message);
     }
 
-    public void requestPendingFriends() throws SocketException {
+    public void requestPendingFriends() {
         timeStamp();
         System.out.println(FRN);
         sendToServer(FRN);
     }
 
-    private void initializeCommunication(String name, String ip) throws InterruptedException {
+    private void initializeCommunication(String name, String ip) {
         contactList.getUser(name).initializeCommunication(ip);
         sendPortData(name, contactList.getUser(name).getPort());
     }
 
-    public void exit() throws IOException {
+    public void exit() {
         timeStamp();
         System.out.println(EXIT);
         sendToServer(EXIT);
-        //closeEverything();
+        closeEverything();
+    }
+
+    public void logout() {
+
+        setLoggedIn(false);
+
+        timeStamp();
+        System.out.println(EXIT);
+        sendToServer(EXIT);
+
     }
 
 
     public void sendPortData(String name, int port) {
         new Thread(() -> {
             int sendLastTime = 5;
-            while (contactList.getUser(name).getConnectionPending() || sendLastTime != 0) {
-                try {
+            try {
+                while (contactList.getUser(name).getConnectionPending() || sendLastTime != 0) {
+
                     timeStamp();
                     System.out.println(PRT + "_" + name + "_" + port);
                     sendToServer(PRT + "_" + name + "_" + port);
-                    Thread.sleep(5000);
                     if (!contactList.getUser(name).getConnectionPending()) {
                         sendLastTime--;
                     }
-                } catch (InterruptedException | SocketException e) {
-                    e.printStackTrace();
+                    Thread.sleep(5000);
                 }
+            } catch (Exception ignored) {
             }
         }).start();
+
 
     }
 
     public void sendAlive() {
         new Thread(() -> {
-            while (getIsConnected()) {
-                try {
+            try {
+                while (getIsConnected()) {
                     sendToServer("PNG");
-                    Thread.sleep(5000);
-                } catch (SocketException | InterruptedException e) {
-                    e.printStackTrace();
+                    Thread.sleep(10000);
                 }
+            } catch (Exception ignored) {
             }
         }).start();
+
     }
 
     public void requestContactData() {
-
         new Thread(() -> {
-            while (getIsConnected()) {
-                for (User contact : contactList.getContacts().subList(1, contactList.getContacts().size()))
-                    if (contact.getIsConfirmed()) {
-                        try {
+            try {
+                while (getIsConnected() && getLoggedIn()) {
+                    for (User contact : contactList.getContacts().subList(1, contactList.getContacts().size()))
+                        if (contact.getIsConfirmed()) {
                             timeStamp();
                             System.out.println(USR_REQUEST + "_" + contact.getName());
                             sendToServer(USR_REQUEST + "_" + contact.getName());
-                        } catch (SocketException s) {
-                            System.out.println("SOCKET CLOSED");
-                            closeEverything();
-                            break;
                         }
-                    }
-
-                try {
                     Thread.sleep(10000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
+            } catch (Exception ignored) {
             }
         }).start();
+
     }
 
 
-
-    private void sendToServer(String message) throws SocketException {
+    private void sendToServer(String message) {
         try {
             bufferedWriter.write(message);
             bufferedWriter.newLine();
             bufferedWriter.flush();
-        } catch (IOException e) {
+        } catch (Exception e) {
             closeEverything();
         }
     }
@@ -293,6 +296,7 @@ public class TcpConnection {
                     case LOG_USER: {
                         if (messageArray[1].equals("TRUE")) {
                             setLoggedIn(true);
+
                         } else {
                             setStatus("connection refused");
                         }
@@ -380,16 +384,12 @@ public class TcpConnection {
                     }
                     default:
                         break;
-
-                    case EXIT:
-                        return;
                 }
 
 
             } catch (Exception e) {
-                e.printStackTrace();
                 closeEverything();
-
+                e.printStackTrace();
                 break;
             }
         }

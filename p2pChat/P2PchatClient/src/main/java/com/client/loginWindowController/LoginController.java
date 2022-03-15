@@ -16,16 +16,19 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.net.SocketException;
 import java.net.URL;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 
 public class LoginController implements Initializable {
+
 
     @FXML
     private Pane directWindow;
@@ -71,7 +74,8 @@ public class LoginController implements Initializable {
         loginButton.disableProperty().bind(TcpConnection.IsConnectedProperty().not());
         registerButton.disableProperty().bind(TcpConnection.IsConnectedProperty().not());
         goToRegButton.disableProperty().bind(TcpConnection.IsConnectedProperty().not());
-        redoIcon.visibleProperty().bind(TcpConnection.connectionStartedProperty().not());
+        redoIcon.visibleProperty().bind(TcpConnection.IsConnectedProperty().not());
+
 
     }
     @FXML
@@ -80,8 +84,8 @@ public class LoginController implements Initializable {
         initTcpConnection(tcpConnection);
     }
 
-    public void initTcpConnection(TcpConnection tcpConnection){
-        this.tcpConnection = tcpConnection;
+    public void initTcpConnection(TcpConnection connect){
+        this.tcpConnection = Objects.requireNonNullElseGet(connect, TcpConnection::new);
 
         tcpConnection.loggedInProperty().addListener(event -> {
             if (tcpConnection.getLoggedIn()) {
@@ -146,6 +150,7 @@ public class LoginController implements Initializable {
                 User contact = new User(ip, Integer.parseInt(portField.getText()));
                 contact.openUdpConnection(Integer.parseInt(portField.getText()));
                 contact.setIsConfirmed();
+                contact.setIsConnectionEstablished(false);
                 contact.startCommunication();
 
 
@@ -172,14 +177,17 @@ public class LoginController implements Initializable {
         if(loginName.getText().equals("test1")) {
             user = new User("test2");
             user.setIsConfirmed();
+            user.setIsConnectionEstablished(false);
             contactList.addUser(user);
 
             user = new User("test3");
             user.setIsInboundRequest(true);
+            user.setIsConnectionEstablished(false);
             contactList.addUser(user);
 
             user = new User("test4");
             user.setIsOutboundRequest(true);
+            user.setIsConnectionEstablished(false);
             contactList.addUser(user);
 
         }
@@ -187,10 +195,12 @@ public class LoginController implements Initializable {
         if(loginName.getText().equals("test2")) {
             user = new User("test1");
             user.setIsConfirmed();
+            user.setIsConnectionEstablished(false);
             contactList.addUser(user);
 
             user = new User("test3");
             user.setIsConfirmed();
+            user.setIsConnectionEstablished(false);
             contactList.addUser(user);
 
         }
@@ -198,10 +208,12 @@ public class LoginController implements Initializable {
         if(loginName.getText().equals("test3")) {
             user = new User("test1");
             user.setIsConfirmed();
+            user.setIsConnectionEstablished(false);
             contactList.addUser(user);
 
             user = new User("test2");
             user.setIsConfirmed();
+            user.setIsConnectionEstablished(false);
             contactList.addUser(user);
 
         }
@@ -248,19 +260,19 @@ public class LoginController implements Initializable {
 
         mainFrameController.loadContacts();
 
-        Stage stage = ((Stage) directUserName.getScene().getWindow());
+        Stage stage = ChatApp.getMainStage();
+        stage.setResizable(true);
+
+        stage.setOnHiding(event -> tcpConnection.exit());
         stage.setScene(scene);
         stage.show();
-
-
-
     }
 
     //ANIMATIONS
     @FXML
     private void toRegister() {
         TranslateTransition slide = new TranslateTransition();
-        slide.setDuration(Duration.seconds(0.4));
+        slide.setDuration(Duration.seconds(0.3));
         slide.setNode(registrationWindow);
 
         slide.setToX(300);
@@ -270,7 +282,7 @@ public class LoginController implements Initializable {
     @FXML
     private void toDirect() {
         TranslateTransition slide = new TranslateTransition();
-        slide.setDuration(Duration.seconds(0.4));
+        slide.setDuration(Duration.seconds(0.3));
         slide.setNode(directWindow);
 
         slide.setToX(-300);
@@ -280,7 +292,7 @@ public class LoginController implements Initializable {
     @FXML
     private void registerToLogin() {
         TranslateTransition slide = new TranslateTransition();
-        slide.setDuration(Duration.seconds(0.4));
+        slide.setDuration(Duration.seconds(0.3));
         slide.setNode(registrationWindow);
 
         slide.setToX(-300);
@@ -290,7 +302,7 @@ public class LoginController implements Initializable {
     @FXML
     private void directToLogin() {
         TranslateTransition slide = new TranslateTransition();
-        slide.setDuration(Duration.seconds(0.4));
+        slide.setDuration(Duration.seconds(0.3));
         slide.setNode(directWindow);
 
         slide.setToX(300);

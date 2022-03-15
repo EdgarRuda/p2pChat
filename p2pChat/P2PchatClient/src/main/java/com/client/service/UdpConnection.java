@@ -22,43 +22,24 @@ public class UdpConnection {
     private int socketPort;
 
     private User user;
-
     private Timer timer = new Timer();
 
+    private boolean socketOpen;
     private final SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
-
-    public boolean socketOpen;
-
-    public void setPort(int port){
-        this.socketPort = port;
-    }
 
     private final String PNG = "PNG";
     private final String MSG = "MSG";
 
-    private static final BooleanProperty isConnected = new SimpleBooleanProperty();
-
-    public static BooleanProperty IsConnectedProperty() {
-        return isConnected;
-    }
-
-    public static Boolean getIsConnected() {
-        return isConnected.get();
-    }
-
-    public final void setIsConnected(boolean status) {
-        IsConnectedProperty().set(status);
-        timeStamp();
-        System.out.println(status);
-    }
+    public void setPort(int port) {this.socketPort = port;}
 
     public void setUser(User user) {
         this.user = user;
     }
 
-    public int getPort(){
-        return socket.getLocalPort();
-    }
+    public int getPort() {return socket.getLocalPort();}
+
+    public boolean getSocketOpen() {return this.socketOpen;}
+    public void setSocketOpen(boolean status) {this.socketOpen = status;}
 
 
     //for login connection
@@ -67,7 +48,7 @@ public class UdpConnection {
         try {
             socket = new DatagramSocket();
             socketPort = socket.getLocalPort();
-            socketOpen=true;
+            socketOpen = true;
 
             timeStamp();
             System.out.println("UDP OPEN: " + socket.getLocalPort());
@@ -78,21 +59,22 @@ public class UdpConnection {
     }
 
     //for direct connection
-    public UdpConnection(int socketPort) throws Exception {
+    public UdpConnection(int socketPort)  {
 
         try {
             socket = new DatagramSocket(socketPort);
-            socketOpen=true;
+            socketOpen = true;
             this.socketPort = socketPort;
 
             timeStamp();
-            System.out.println("UDP OPEN: " +socketPort);
+            System.out.println("UDP OPEN: " + socketPort);
 
         } catch (Exception e) {
             System.out.println("PORT NUM " + socketPort + " IS BUSY, RUN AGAIN WITH ANOTHER PORT");
-            throw new Exception();
+            closeSocket();
         }
     }
+
     //
     public void timeStamp() {
         System.out.print("[" + format.format(new Date()) + "] ");
@@ -102,26 +84,27 @@ public class UdpConnection {
     public void sendMessage(String message) {
         byte[] data;
 
-        try {
-            data = (MSG +";"+ user.getName() + ";" + message).getBytes();
+        if(socketOpen) {
+            try {
+                data = (MSG + "_" + user.getName() + "_" + message).getBytes();
 
-            timeStamp();
-            System.out.println("outbound msg: " + InetAddress.getByName(user.getIp()) + "_" + socketPort);
+                timeStamp();
+                System.out.println("outbound msg: " + InetAddress.getByName(user.getIp()) + "_" + socketPort);
 
-            socket.send(new DatagramPacket(data, data.length, InetAddress.getByName(user.getIp()), socketPort));
+                socket.send(new DatagramPacket(data, data.length, InetAddress.getByName(user.getIp()), socketPort));
 
-        } catch (Exception e) {
-            timeStamp();
-            System.out.println("SENDER - ERROR ON SENDING PLS RESTART");
-            closeSocket();
+            } catch (Exception e) {
+                timeStamp();
+                System.out.println("SENDER - ERROR ON SENDING PLS RESTART");
+                closeSocket();
+            }
         }
-
     }
 
     public void pingContact() {
 
         new Thread(() -> {
-            byte[] data = (PNG +";" + user.getName()).getBytes();
+            byte[] data = (PNG + "_" + user.getName()).getBytes();
 
             while (socketOpen) {
                 try {
@@ -133,7 +116,7 @@ public class UdpConnection {
                     socket.send(new DatagramPacket(data, data.length,
                             InetAddress.getByName(user.getIp()), socketPort));
 
-                    Thread.sleep(13000);
+                    Thread.sleep(10000);
 
                 } catch (Exception ignored) {
                     timeStamp();
@@ -176,7 +159,7 @@ public class UdpConnection {
                     if (hasNull) continue;
 
                     switch (messageArr[0]) {
-                        case "PNG": {
+                        case PNG: {
                             if (!user.getIsConnectionEstablished()) {
                                 user.setIsConnectionEstablished(true);
                                 startTimer(user);
@@ -197,24 +180,18 @@ public class UdpConnection {
                             startTimer(user);
                             break;
                         }
-                        case "MSG": {
+                        case MSG: {
                             timeStamp();
                             System.out.println("inbound msg: " + user.getName() + ":" + messageArr[2]);
                             user.displayMessage(messageArr[2]);
                             break;
                         }
-                        case "PRT":{
-                            timeStamp();
-                            System.out.println("inbound msg: " + Arrays.toString(messageArr));
-                        }
-                        case "USR":{
-                            timeStamp();
-                            System.out.println("inbound msg: " + Arrays.toString(messageArr));
-                        }
 
-                        case "EXT": return;
+                        case "EXT":
+                            return;
 
-                        default: break;
+                        default:
+                            break;
 
                     }
                 } catch (Exception e) {
@@ -226,7 +203,6 @@ public class UdpConnection {
             }
         }).start();
     }
-
 
 
     private void startTimer(User user) {
@@ -257,17 +233,17 @@ public class UdpConnection {
 
     }
 
-    public void closeSocket(){
-        if(socket!=null){
-        socketOpen=false;
-        timeStamp();
-        System.out.println("UDP CLOSE: " + socket.getLocalPort());
-        try{
-        socket.send(new DatagramPacket("EXT".getBytes(), 3, InetAddress.getByName("localhost"), socket.getLocalPort()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        socket.close();
+    public void closeSocket() {
+        if (socket != null) {
+            socketOpen = false;
+            timeStamp();
+            System.out.println("UDP CLOSE: " + socket.getLocalPort());
+            try {
+                socket.send(new DatagramPacket("EXT".getBytes(), 3, InetAddress.getByName("localhost"), socket.getLocalPort()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            socket.close();
         }
     }
 

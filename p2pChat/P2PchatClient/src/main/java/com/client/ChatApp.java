@@ -10,10 +10,14 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+
+
 public class ChatApp extends Application {
 
+    private static Stage mainStage;
 
-
+    public static Stage getMainStage(){ return mainStage;}
+    private static void setMainStage(Stage stage) {mainStage = stage;}
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -27,9 +31,13 @@ public class ChatApp extends Application {
         LoginController loginController = loginLoader.getController();
         loginController.initTcpConnection(tcpConnection);
 
+        setMainStage(stage);
+        stage.setOnHiding(event -> tcpConnection.exit());
+
         Scene scene = new Scene(root);
         stage.setTitle("login");
         stage.setScene(scene);
+        stage.setResizable(false);
         stage.show();
 
     }

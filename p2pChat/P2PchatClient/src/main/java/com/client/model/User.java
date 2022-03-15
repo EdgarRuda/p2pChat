@@ -133,17 +133,16 @@ public class User  {
 
     //direct connection
 
-    public void openUdpConnection(int port) throws Exception {
+    public void openUdpConnection(int port)  {
         udpConnection = new UdpConnection(port);
         udpConnection.setUser(this);
         setPort(port);
     }
 
     public void startCommunication(){
-        try {
-            udpConnection.pingContact();
-            udpConnection.listenForMessage();
-        }catch (Exception ignored){}
+
+        udpConnection.listenForMessage();
+        udpConnection.pingContact();
     }
 
 
@@ -165,7 +164,7 @@ public class User  {
     public void startCommunication(int port){
         try {
             udpConnection.setPort(port);
-            udpConnection.socketOpen = true;
+            udpConnection.setSocketOpen(true);
             this.setConnectionPending(false);
             udpConnection.listenForMessage();
             udpConnection.pingContact();
@@ -183,7 +182,7 @@ public class User  {
         initializeController();
     }
 
-    public User(String name) throws Exception {
+    public User(String name) throws IOException {
         setName(name);
         setIp("");
         setIsConnectionEstablished(false);
