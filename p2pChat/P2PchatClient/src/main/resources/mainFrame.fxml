@@ -40,12 +40,13 @@
                 <RowConstraints minHeight="400.0" prefHeight="400.0" vgrow="ALWAYS" />
               </rowConstraints>
                <children>
-                  <ScrollPane fx:id="scrollableLeftPane" id="scrollableLeftPane" hbarPolicy="NEVER" vbarPolicy="NEVER" GridPane.rowIndex="2">
+                  <ScrollPane id="scrollableLeftPane" fx:id="scrollableLeftPane" hbarPolicy="NEVER" vbarPolicy="NEVER" GridPane.rowIndex="2">
                      <content>
                         <StackPane id="scrollableLeftPane">
                            <children>
-                              <VBox fx:id="contactListBox" alignment="TOP_CENTER"  />
-                              <VBox fx:id="searchResultBox" alignment="TOP_CENTER"  />
+                              <Pane fx:id="backgroundPane" prefHeight="200.0" prefWidth="200.0" />
+                              <VBox fx:id="contactListBox" alignment="TOP_CENTER" />
+                              <VBox fx:id="searchResultBox" alignment="TOP_CENTER" />
                               <Pane focusTraversable="true" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0">
                                  <children>
                                     <Label fx:id="searchResultNotification" alignment="CENTER" contentDisplay="CENTER" prefHeight="70.0" prefWidth="200.0" text="start typing to see results.." />

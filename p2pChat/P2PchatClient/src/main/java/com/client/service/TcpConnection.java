@@ -31,27 +31,28 @@ public class TcpConnection {
     private MainFrameController mainFrameController;
 
     private static final StringProperty status = new SimpleStringProperty();
-
     public static StringProperty statusProperty() {
         return status;
     }
-
     public final void setStatus(String status) {
         Platform.runLater(() -> statusProperty().set(status));
         timeStamp();
         System.out.println(status);
     }
 
-    private static final BooleanProperty isConnected = new SimpleBooleanProperty();
+    private static final StringProperty registrationStatus = new SimpleStringProperty();
+    public static StringProperty registrationStatusProperty() {
+        return registrationStatus;
+    }
+    public final void setRegistrationStatus(String status) {Platform.runLater(() -> registrationStatusProperty().set(status));}
 
+    private static final BooleanProperty isConnected = new SimpleBooleanProperty();
     public static BooleanProperty IsConnectedProperty() {
         return isConnected;
     }
-
     public static Boolean getIsConnected() {
         return isConnected.get();
     }
-
     public final void setIsConnected(boolean status) {
         IsConnectedProperty().set(status);
         timeStamp();
@@ -59,15 +60,12 @@ public class TcpConnection {
     }
 
     private final BooleanProperty loggedIn = new SimpleBooleanProperty();
-
     public BooleanProperty loggedInProperty() {
         return loggedIn;
     }
-
     public Boolean getLoggedIn() {
         return loggedIn.get();
     }
-
     public final void setLoggedIn(boolean status) {
         Platform.runLater(() -> loggedInProperty().set(status));
         timeStamp();
@@ -75,15 +73,12 @@ public class TcpConnection {
     }
 
     private static final BooleanProperty connectionStarted = new SimpleBooleanProperty();
-
     public static BooleanProperty connectionStartedProperty() {
         return connectionStarted;
     }
-
     public Boolean getConnectionStarted() {
         return connectionStarted.get();
     }
-
     public final void setConnectionStarted(boolean status) {
         Platform.runLater(() -> connectionStartedProperty().set(status));
         timeStamp();
@@ -113,6 +108,7 @@ public class TcpConnection {
 
             setIsConnected(true);
             setStatus("connection established");
+            setRegistrationStatus("");
             Thread listener = new Thread(this::listenFromServer);
             listener.start();
             setConnectionStarted(false);
@@ -294,19 +290,22 @@ public class TcpConnection {
 
                 switch (messageArray[0]) {
                     case LOG_USER: {
-                        if (messageArray[1].equals("TRUE")) {
+                        if (messageArray[1].equals("TRUE"))
                             setLoggedIn(true);
 
-                        } else {
-                            setStatus("connection refused");
-                        }
+                        if (messageArray[1].equals("FALSE"))
+                            setStatus("login refused");
+
                         break;
                     }
 
                     case REG_USER: {
-                        if (messageArray[1].equals("TRUE")) {
+                        if (messageArray[1].equals("TRUE")){
+                            setRegistrationStatus("logging in..");
                             setLoggedIn(true);
                         }
+                        if (messageArray[1].equals("FALSE"))
+                            setRegistrationStatus("registration refused");
                         break;
                     }
 
@@ -389,7 +388,6 @@ public class TcpConnection {
 
             } catch (Exception e) {
                 closeEverything();
-                e.printStackTrace();
                 break;
             }
         }

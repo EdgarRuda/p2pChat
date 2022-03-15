@@ -4,6 +4,7 @@ module com.client {
 
     requires org.controlsfx.controls;
     requires org.kordamp.bootstrapfx.core;
+    requires net.synedra.validatorfx;
 
     exports com.client.model;
     exports com.client;

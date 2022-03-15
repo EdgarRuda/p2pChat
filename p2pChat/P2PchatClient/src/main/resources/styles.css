@@ -29,7 +29,8 @@
 #contactListBox,
 #userInfoBox,
 #searchBox,
-#scrollableLeftPane
+#scrollableLeftPane,
+#backgroundPane
 {
 -fx-background-color: #212121;
 }

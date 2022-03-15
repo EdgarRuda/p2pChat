@@ -31,6 +31,8 @@ import java.util.Objects;
 
 public class MainFrameController{
     @FXML
+    private Pane backgroundPane;
+    @FXML
     private ScrollPane scrollableLeftPane;
     @FXML
     private AnchorPane mainView;
@@ -50,9 +52,7 @@ public class MainFrameController{
 
 
     private ContactList contactList;
-
     private TcpConnection tcpConnection;
-
     private boolean searchStarted;
 
 
@@ -60,6 +60,8 @@ public class MainFrameController{
     public void initUserSearch() {
 
         scrollableLeftPane.requestFocus();
+        scrollableLeftPane.heightProperty().addListener(event ->
+                backgroundPane.setPrefHeight(scrollableLeftPane.getHeight()));
 
         searchResultBox.setTranslateX(-200);
         searchResultNotification.setVisible(false);
