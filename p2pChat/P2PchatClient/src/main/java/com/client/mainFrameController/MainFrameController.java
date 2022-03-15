@@ -16,6 +16,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
@@ -30,6 +32,10 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class MainFrameController{
+    @FXML
+    private ImageView clearTextButton;
+    @FXML
+    private ImageView logoutIcon;
     @FXML
     private Pane backgroundPane;
     @FXML
@@ -62,6 +68,13 @@ public class MainFrameController{
         scrollableLeftPane.requestFocus();
         scrollableLeftPane.heightProperty().addListener(event ->
                 backgroundPane.setPrefHeight(scrollableLeftPane.getHeight()));
+
+        clearTextButton.setOnMouseClicked(event-> searchBar.setText(""));
+        logoutIcon.setOnMouseClicked(event-> {
+            try {
+                logout();
+            } catch (IOException ignored) {}
+        });
 
         searchResultBox.setTranslateX(-200);
         searchResultNotification.setVisible(false);
@@ -142,7 +155,7 @@ public class MainFrameController{
 
 
     @FXML
-    public void logout() throws IOException{
+    public void logout() throws IOException {
         if (tcpConnection != null)
            tcpConnection.logout();
 
@@ -150,7 +163,6 @@ public class MainFrameController{
 
         FXMLLoader loader = new FXMLLoader(ChatApp.class.getResource("/login.fxml"));
         Scene scene = new Scene(loader.load());
-
         LoginController loginController = loader.getController();
         loginController.initTcpConnection(this.tcpConnection);
 
@@ -162,7 +174,7 @@ public class MainFrameController{
                 clearContacts();
                 tcpConnection.exit();
             });
-
+        stage.setTitle("login");
         stage.setScene(scene);
         stage.show();
     }
@@ -264,22 +276,24 @@ public class MainFrameController{
                 ((Label) child).textProperty().bind(user.nameProperty());
             if (child instanceof Label && child.getId().equals("userStatus"))
                 ((Label) child).textProperty().bind(user.userStatusProperty());
-            if (child instanceof Circle && child.getId().equals("statusCircle")){
+            if (child.getId().equals("messageUnreadStatus"))
+                child.visibleProperty().bind(user.messageUnreadProperty());
+            if (child.getId().equals("statusCircle")){
                 child.visibleProperty().bind(user.isConfirmedProperty());
                 child.styleProperty().bind(user.profileStatusProperty());
             }
-            if (child instanceof Button && child.getId().equals("declineContact")){
+//            if (child instanceof Pane && child.getId().equals("focusPane")) {
+//                child.setOnMouseEntered(event -> child.setStyle("-fx-background-color: #666699;"));
+//                child.setOnMouseExited(event -> child.setStyle(""));
+//            }
+            if (child.getId().equals("declineContact")){
                 child.visibleProperty().bind(user.isInboundRequestProperty());
                 if (user.getIsInboundRequest()){
-                    ((Button) child).setOnAction(event -> {
-                        try {
+                    child.setOnMouseClicked(event -> {
+
                             tcpConnection.respondToFriendRequest(user.getName(), false);
                             contactList.removeUser(user);
                             Platform.runLater(()->contactListBox.getChildren().remove(pane));
-
-                        } catch (SocketException e) {
-                            e.printStackTrace();
-                        }
                     });
                 }
             }
@@ -308,10 +322,11 @@ public class MainFrameController{
             if(contactList.getCurrentUser()!= user) {
 
                 mainPane.setCenter(user.getChatScene().getRoot());
-
+                contactList.getCurrentUser().setIsFocused(false);
                 contactList.getCurrentUser().setProfileStyle("");
                 contactList.setCurrentUser(user);
-                contactList.getCurrentUser().setProfileStyle("-fx-background-color: rgb(102, 102, 153);");
+                user.setIsFocused(true);
+                user.setProfileStyle("-fx-background-color: #666699;");
             }
 
         });

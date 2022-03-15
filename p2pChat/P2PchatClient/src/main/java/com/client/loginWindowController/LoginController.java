@@ -21,11 +21,9 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import net.synedra.validatorfx.Validator;
 
-import java.net.SocketException;
 import java.net.URL;
 import java.util.Objects;
 import java.util.ResourceBundle;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class LoginController implements Initializable {
@@ -88,6 +86,26 @@ public class LoginController implements Initializable {
         registerButton.disableProperty().bind(TcpConnection.IsConnectedProperty().not());
         goToRegButton.disableProperty().bind(TcpConnection.IsConnectedProperty().not());
         redoIcon.visibleProperty().bind(TcpConnection.IsConnectedProperty().not());
+
+        loginPass.setOnKeyPressed(event -> {
+            if(event.getText().equals("\r"))
+                    loginToServer();
+        });
+
+        portField.setOnKeyPressed(event -> {
+            if(event.getText().equals("\r")) {
+                try {
+                    directConnection();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        secondPassRegistration.setOnKeyPressed(event -> {
+            if(event.getText().equals("\r"))
+                registerUser();
+        });
 
         directConnectionValidator.createCheck()
                 .dependsOn("username", directUserName.textProperty())
@@ -223,7 +241,7 @@ public class LoginController implements Initializable {
     }
 
     @FXML
-    private void loginToServer() throws Exception {
+    private void loginToServer() {
         if (TcpConnection.getIsConnected()) {
             serverConnectionValidator.validate();
             if (!serverConnectionValidator.containsErrors())
@@ -232,7 +250,7 @@ public class LoginController implements Initializable {
     }
 
     @FXML
-    private void registerUser() throws SocketException {
+    private void registerUser()  {
         if (TcpConnection.getIsConnected()){
             registrationValidator.validate();
             if(!registrationValidator.containsErrors())
@@ -260,35 +278,6 @@ public class LoginController implements Initializable {
             contactList.addUser(contact);
             openMainFrame(false);
 
-
-//        if (!directUserName.getText().isEmpty())
-//            if (!ipField.getText().isEmpty()) {
-//
-//                String ip = ipField.getText();
-//                if (!VerificationService.verifyIp(ip))
-//                    return;
-//
-//                String port = portField.getText();
-//                if (port.length() > 5)
-//                    return;
-//                for (int i = 0; i < 5; i++)
-//                    if (!Character.isDigit(port.charAt(i)))
-//                        return;
-//
-//                User me = new User(directUserName.getText());
-//
-//                contactList.addUser(me);
-//
-//                User contact = new User(ip, Integer.parseInt(portField.getText()));
-//                contact.openUdpConnection(Integer.parseInt(portField.getText()));
-//                contact.setIsConfirmed();
-//                contact.setIsConnectionEstablished(false);
-//                contact.startCommunication();
-//
-//
-//                contactList.addUser(contact);
-//                openMainFrame(false);
-//            }
     }
 
     private void openMainFrame(boolean tcpEnabled) throws Exception {
@@ -350,51 +339,11 @@ public class LoginController implements Initializable {
 
         }
 
-//        if(loginName.getText().equals("ed1")) {
-//            user = new User("Tadas");
-//            user.setIsConfirmed();
-//            user.setIsConnectionEstablished(false);
-//            contactList.addUser(user);
-//
-//            user = new User("Laura");
-//            user.setIsConfirmed();
-//            user.setIsConnectionEstablished(false);
-//            contactList.addUser(user);
-//        }
-//
-//        if(loginName.getText().equals("Tadas")) {
-//            user = new User("Laura");
-//            user.setIsConfirmed();
-//            user.setIsConnectionEstablished(false);
-//
-//            contactList.addUser(user);
-//
-//            user = new User("ed1");
-//            user.setIsConfirmed();
-//            user.setIsConnectionEstablished(false);
-//            contactList.addUser(user);
-//
-//        }
-//        if(loginName.getText().equals("Laura")) {
-//            user = new User("Tadas");
-//            user.setIsConfirmed();
-//            user.setIsConnectionEstablished(false);
-//
-//            contactList.addUser(user);
-//
-//            user = new User("ed1");
-//            user.setIsConfirmed();
-//            user.setIsConnectionEstablished(false);
-//            contactList.addUser(user);
-//        }
-
-
-
         mainFrameController.loadContacts();
 
         Stage stage = ChatApp.getMainStage();
         stage.setResizable(true);
-
+        stage.setTitle("chat");
         stage.setOnHiding(event -> tcpConnection.exit());
         stage.setScene(scene);
         stage.show();

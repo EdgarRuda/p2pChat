@@ -100,16 +100,10 @@ public class User  {
         Platform.runLater(()->this.setIsInboundRequest(false));
     }
 
-
-//    public boolean getCommunicationStarted() {return this.communicationStarted;}
-//    public void setCommunicationStarted(boolean status) {this.communicationStarted = status;}
-
-//    public boolean getConnectionEstablished() {return this.connectionEstablished;}
-//    public void setConnectionEstablished(boolean status) {this.connectionEstablished = status;}
-
-
-
-
+    private final BooleanProperty messageUnread = new SimpleBooleanProperty();
+    public final BooleanProperty messageUnreadProperty(){return this.messageUnread;}
+    public boolean getMessageUnread(){return this.messageUnread.get();}
+    public void setMessageUnread(boolean status) {this.messageUnread.set(status);}
 
     private void initializeController() throws IOException {
         FXMLLoader loader = new FXMLLoader(ChatApp.class.getResource("/chat.fxml"));
@@ -126,10 +120,15 @@ public class User  {
     public void displayMessage(String message){
         chatController.displayMessage(message);
     }
-    public void sendUdpMessage(String message){
-        udpConnection.sendMessage(message);
+    public void sendUdpMessage(String message){udpConnection.sendMessage(message);}
 
+
+    public boolean getIsFocused(){return this.isFocused;}
+    public void setIsFocused(boolean status) {
+        this.isFocused = status;
+        setMessageUnread(false);
     }
+
 
     //direct connection
 

@@ -5,11 +5,12 @@ import com.client.service.TcpConnection;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-
+import java.util.Objects;
 
 
 public class ChatApp extends Application {
@@ -36,6 +37,7 @@ public class ChatApp extends Application {
 
         Scene scene = new Scene(root);
         stage.setTitle("login");
+        stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/img/java.png"))));
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();

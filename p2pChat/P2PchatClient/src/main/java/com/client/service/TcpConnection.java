@@ -133,13 +133,13 @@ public class TcpConnection {
         System.out.print("[" + format.format(new Date()) + "] ");
     }
 
-    public void tryToLogin(String userName, String password) throws SocketException {
+    public void tryToLogin(String userName, String password) {
         timeStamp();
         System.out.println(LOG_USER + "_" + userName + "_" + password);
         sendToServer(LOG_USER + "_" + userName + "_" + password);
     }
 
-    public void registerUser(String userName, String pass) throws SocketException {
+    public void registerUser(String userName, String pass){
         timeStamp();
         System.out.println(REG_USER + "_" + userName + "_" + pass);
         sendToServer(REG_USER + "_" + userName + "_" + pass);
@@ -158,7 +158,7 @@ public class TcpConnection {
         sendToServer(ADD + "_" + userName);
     }
 
-    public void respondToFriendRequest(String userName, boolean accepted) throws SocketException {
+    public void respondToFriendRequest(String userName, boolean accepted){
         timeStamp();
         String message = ADD + "_" + userName + "_" + String.valueOf(accepted).toUpperCase();
         System.out.println(message);

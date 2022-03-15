@@ -36,13 +36,13 @@ public class ChatController implements Initializable {
     private final String IS_OUT_PENDING = "user has not accepted your request yet";
     private boolean notificationSend;
 
-    private boolean messageUnread;
 
-    private User chatUser;
+
+    private User user;
     DateFormat format = new SimpleDateFormat("HH:mm");
 
     public void setupUser(User user){
-        this.chatUser = user;}
+        this.user = user;}
 
     @FXML
     public void checkForEnter(KeyEvent keyEvent) {
@@ -71,7 +71,7 @@ public class ChatController implements Initializable {
 
 
             if(verifyUserStatus())
-                chatUser.sendUdpMessage(messageToSend);
+                user.sendUdpMessage(messageToSend);
 
             messageBox.getChildren().addAll(timeHBox,hbox);
             messageField.clear();
@@ -81,15 +81,15 @@ public class ChatController implements Initializable {
 
     public boolean verifyUserStatus(){
 
-        if(chatUser.getIsInboundRequest()){
+        if(user.getIsInboundRequest()){
             if(!notificationSend)
                 displayNotification(IS_IN_PENDING );
         }
-        else if(chatUser.getIsOutboundRequest()){
+        else if(user.getIsOutboundRequest()){
             if(!notificationSend)
                 displayNotification(IS_OUT_PENDING);
         }
-        else if(!chatUser.getIsConnectionEstablished()){
+        else if(!user.getIsConnectionEstablished()){
             if(!notificationSend)
                 displayNotification(IS_OFFLINE);
         }
@@ -117,7 +117,9 @@ public class ChatController implements Initializable {
 
     public void displayMessage(String message) {
 
-        messageUnread= !chatUser.isFocused && !messageUnread;
+        //user.setMessageUnread(!user.getIsFocused() && !user.getMessageUnread());
+        if(!user.getIsFocused())
+            user.setMessageUnread(true);
 
         TextFlow textFlow = new TextFlow(new Text(message));
         textFlow.setId("clientTextFlow");
@@ -134,10 +136,7 @@ public class ChatController implements Initializable {
         timeHBox.setAlignment(Pos.CENTER_LEFT);
 
 
-        Platform.runLater(() -> {
-            messageBox.getChildren().addAll(timeHBox, hbox);
-
-        });
+        Platform.runLater(() -> messageBox.getChildren().addAll(timeHBox, hbox));
     }
 
     @Override

@@ -5,9 +5,13 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
 <Pane fx:id="contactProfile" prefHeight="80.0" prefWidth="200.0" stylesheets="styles.css, noFocus.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
    <children>
+
+<!--      <Pane id="colorPane" focusTraversable="true"  prefHeight="80.0" prefWidth="200.0" />-->
+
       <Label id="userName" layoutX="80.0" layoutY="20.0" text="Label" />
       <Label id="userStatus" layoutX="80.0" layoutY="40.0" text="Label" />
       <Circle id="userCircle" fill="#acb2b9" layoutX="40.0" layoutY="40.0" radius="25.0" />
@@ -18,9 +22,13 @@
       </Label>
       <Circle id="statusCircle" fill="#c94242" layoutX="55.0" layoutY="55.0" radius="8.0" stroke="BLACK" />
       <Button id="addUserToContacts" layoutX="152.0" layoutY="28.0" mnemonicParsing="false" text="add" />
-      <Button id="declineContact" alignment="CENTER" contentDisplay="CENTER" graphicTextGap="0.0" layoutX="178.0" layoutY="22.0" maxHeight="13.0" maxWidth="13.0" minHeight="13.0" minWidth="13.0" mnemonicParsing="false" prefHeight="5.0" prefWidth="5.0" style="-fx-background-radius: 10;" text="X" visible="false">
+      <Circle id="declineContact" fill="#c94242" layoutX="187.0" layoutY="30.0" radius="6.0" stroke="BLACK" visible="false" />
+      <Text id="declineContact" focusTraversable="true" layoutX="184.0" layoutY="33.0" mouseTransparent="true" strokeType="OUTSIDE" strokeWidth="0.0" text="x" visible="false" wrappingWidth="6.828125">
          <font>
-            <Font name="System Bold" size="6.0" />
-         </font></Button>
+            <Font name="System Bold" size="10.0" />
+         </font>
+      </Text>
+      <Circle id="messageUnreadStatus" layoutX="183.0" layoutY="39.0" radius="8.0" stroke="BLACK" />
+<!--      <Pane id="focusPane" focusTraversable="true"  prefHeight="80.0" prefWidth="200.0" />-->
    </children>
 </Pane>
