@@ -41,7 +41,6 @@ public class ContactService {
         }
     }
 
-
     /**
      * @param contactModel receives the contact model to edit its status
      * @param status provided the status condition.

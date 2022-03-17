@@ -43,7 +43,6 @@ public class ServerLaunch {
 
     }
 
-
     /**
      * If server crashes unexpectedly, some user data is not cleaned up - this method clears up the table at launch
      */

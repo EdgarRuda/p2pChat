@@ -5,7 +5,6 @@ import com.server.models.ContactModel;
 import com.server.services.ContactService;
 import com.server.services.UserService;
 import com.server.models.UserModel;
-import org.apache.log4j.Logger;
 
 import java.io.*;
 import java.net.Socket;
@@ -31,9 +30,6 @@ import java.util.List;
  * closeEverything also clears up the ipAddresses of users that were logged in essence securing their data.
  */
 public class ClientHandler implements Runnable {
-
-    private final Logger logger = Logger.getLogger(this.getClass());
-
     public static ArrayList<ClientHandler> userList = new ArrayList<>();
     private String clientUsername;
 
@@ -87,10 +83,7 @@ public class ClientHandler implements Runnable {
     //server: ADD + " " + userName
 
     final String PING = "PNG";
-    //client: PNG GG
-
-
-
+    //client: PNG
 
 
     public ClientHandler(Socket socket, UserService userService, ContactService contactService) {
@@ -106,17 +99,18 @@ public class ClientHandler implements Runnable {
             String userIPNotParsed = String.valueOf(socket.getInetAddress());
             userIP = userIPNotParsed.substring(1);
             while(!isLoggedIn) {
-                String clientMessage = bufferedReader.readLine();
-                logger.info("Message received form Client "+ currentUser.getUserName() +": " + clientMessage);
+                String messageLOGorREG = bufferedReader.readLine();
+
+
+                System.out.println("Message received from Client: " + messageLOGorREG);
 
                 String[] loginMessage = new String[3];   //Make the index free
                 try {
-                    loginMessage = clientMessage.split("_");
+                    loginMessage = messageLOGorREG.split("_");
 
                 } catch (Exception e) {
-                    logger.error("Message String not parsed Correctly");
+                    System.err.println("Message String not parsed Correctly");
                 }
-
 
                 switch (loginMessage[0]) {
 
@@ -137,7 +131,7 @@ public class ClientHandler implements Runnable {
             }
 
         } catch (IOException e) {
-            logger.error("LOG_USER or REG_USER Message Received Incorrectly.");
+            System.err.println("ERROR: LOG_USER or REG_USER Message Received Incorrectly.");
             closeEverything(socket, bufferedReader, bufferedWriter);
         }
     }
@@ -151,37 +145,52 @@ public class ClientHandler implements Runnable {
 
         while (socket.isConnected()) {
             try {
+
                 //reads incoming messages via TCP from Client
                 String clientMessage = bufferedReader.readLine();
-                logger.info("Message received form Client "+ currentUser.getUserName() +": " + clientMessage);
+
+                //Prints User requests from the server
+                System.out.println("Message received form Client "+ currentUser.getUserName() +": " + clientMessage);
+
+                //splits the messages to keywords NAME name PORT port IP ipAddress
                 String[] message = clientMessage.split("_");
+
 
                 switch(message[0]) {
 
                     case LOG_USER:
+
                         logInUser(userServiceGLBL, message);
                         break;
 
                     case REG_USER:
+
                         registerUser(userServiceGLBL, message);
                         break;
 
                     case USR_REQUEST:
+
                         requestUser(message);
                         break;
 
                     case PING:
+
+                        System.out.println(currentUser.getUserName() + " Pinged");
                         break;
 
                     case SEARCH:
+
                         searchForUsers(message);
                         break;
 
                     case FRIENDS:
+
                         sendContactsToClient();
                         break;
 
                     case PORT:
+
+                        //userServiceGLBL.updateUserPortAndIpAddress(currentUser, Integer.valueOf(message[1]), userIP, currentUser.getId());
                         sendMessageToOtherOnlineUser("PRT_" + currentUser.getUserName() + "_" + message[2] ,message[1]);
                         break;
 
@@ -192,13 +201,12 @@ public class ClientHandler implements Runnable {
                         break;
 
                     case EXIT:
-
                         exitCleanup();
                         break;
 
                     default:
 
-                        logger.error("Something is wrong with the Message_types");
+                        System.err.println("Something is wrong with the Message_types");
                         sendToUser("Something is wrong with the Message_types");
                         break;
 
@@ -214,6 +222,14 @@ public class ClientHandler implements Runnable {
     }
 
 
+    public void addContact(UserModel userModel, String name, String status) {
+
+        ContactModel contactModel = new ContactModel(null, name, status, userModel);
+
+        contactServiceGLBL.addContact(contactModel, userModel);
+
+    }
+
     /**
      * @param name specifies the username to which the message is sent to
      * @param status specifies the status that must be placed: pending, accepted, blocked
@@ -228,10 +244,9 @@ public class ClientHandler implements Runnable {
 
         contactServiceGLBL.addContact(contactModel, userToSendTo);
 
-        logger.info("Client: " + currentUser.getUserName() + " was added with status: " + status + " to user: " + userToSendTo);
+        System.out.println("Client: " + currentUser.getUserName() + " was added with status: " + status + " to user: " + userToSendTo);
 
     }
-
 
     /**
      * @param userService specifies that the user service will be called in this method
@@ -247,20 +262,18 @@ public class ClientHandler implements Runnable {
                 userService.updateUserPortAndIpAddress(currentUser, null, userIP, prevUser.getId());
                 this.clientUsername = currentUser.getUserName();
                 userList.add(this);
-                sendToUser("LOG_TRUE");
                 isLoggedIn=true;
-                logger.info("User " + message[1] + " logged in.");
+                sendToUser("LOG_TRUE");
             } else {
                 sendToUser("LOG_FALSE");
             }
         } catch (Exception e) {
             sendToUser("LOG_FALSE");
-            logger.error("Exception while logging in a User: " + message[1]);
+            System.err.println("Exception while logging in a User: " + message[1]);
         }
 
 
     }
-
 
     /**
      * @param userService specifies that the user service will be called in this method
@@ -271,27 +284,28 @@ public class ClientHandler implements Runnable {
         try {
             //Sets the user to be with the unhashed password
             currentUser = new UserModel(null, message[1], null, userIP, message[2]);
+            System.out.println("1. REG PWD: " + currentUser.getPassword());
             //Adds the user and hashes the password
             userService.addUser(currentUser);
             //Receives the user userModel with the hashed password version
             currentUser = userService.findUserModelByName(message[1]);
+            System.out.println("2. REG PWD: " + currentUser.getPassword());
             this.clientUsername = currentUser.getUserName();
             userList.add(this);
             isLoggedIn=true;
             sendToUser("REG_TRUE");
-            logger.info("User " + message[1] + " registered.");
         } catch (Exception e) {
             sendToUser("REG_FALSE");
-            logger.error("Exception while registering a new User " + message[1]);
+            System.err.println("Exception while registering a new User " + message[1]);
         }
     }
-
 
     /**
      * @param message is the input from client that is processed. Index 1 is: the client name
      * @throws IOException because of the use of bufferedWriter to send the response to client.
      */
     public void requestUser(String[] message) throws IOException {
+
         //Finds the user
         String response;
         try {
@@ -307,10 +321,9 @@ public class ClientHandler implements Runnable {
             response = "USR_" + message[1] + "_FAILED";
         }
         sendToUser(response);
-        logger.info("Sending REQUEST_USER response: " + response);
+        System.out.println("Sending USR response: " + response);
 
     }
-
 
     /**
      * @param message is the input from client that is processed. Index 1 is: part of the username that the client is
@@ -329,13 +342,12 @@ public class ClientHandler implements Runnable {
                 }
                 sendToUser(userStringToSend);
             }
-            logger.info("SEARCH: User List sent to user " + currentUser.getUserName());
+            System.out.println("SEARCH: User List sent to user " + currentUser.getUserName());
         } catch (Exception e) {
-            logger.error("SRH failed: No user by the name: " + message[1]);
+            System.err.println("SRH failed: No user by the name: " + message[1]);
             sendToUser("SRH_FALSE");
         }
     }
-
 
     /**
      * @param message specifies the message that has to be sent to client.
@@ -347,7 +359,7 @@ public class ClientHandler implements Runnable {
             bufferedWriter.write(message);
             bufferedWriter.newLine();
             bufferedWriter.flush();
-        } catch (IOException ignored) {
+        } catch (IOException e) {
 
         }
     }
@@ -383,7 +395,7 @@ public class ClientHandler implements Runnable {
             sendMessageToOtherOnlineUser("ADD_" + currentUser.getUserName() + "_FALSE", message[1]);
 
         } else {
-            logger.error("Something wrong with the addContact() method");
+            System.err.println("Something wrong with the addContact() method");
         }
 
 
@@ -396,7 +408,7 @@ public class ClientHandler implements Runnable {
 
         if (currentUser != null) {
         userServiceGLBL.updateUserPortAndIpAddress(currentUser, null, null, currentUser.getId());
-        logger.error("User " + currentUser.getUserName() + " had his port and IP removed form DB" ); }
+        System.err.println("User " + currentUser.getUserName() + " had his port and IP removed form DB" ); }
 
     }
 
@@ -426,7 +438,6 @@ public class ClientHandler implements Runnable {
         }
     }
 
-
     /**
      * @param messageToSend is the message that will be sent to another user.
      * @param userName is the user that will receive the sent message.
@@ -436,7 +447,9 @@ public class ClientHandler implements Runnable {
         for (ClientHandler clientHandler : userList) {
 
             try {
-                if (clientHandler.clientUsername != null && !clientHandler.clientUsername.isEmpty()) {
+                if (clientHandler.clientUsername == null || clientHandler.clientUsername.isEmpty()) {
+
+                } else {
 
                 if (clientHandler.clientUsername.equals(userName) && !clientHandler.clientUsername.equals(currentUser.getUserName())) {
                     clientHandler.bufferedWriter.flush();
@@ -445,7 +458,9 @@ public class ClientHandler implements Runnable {
                     clientHandler.bufferedWriter.flush();
                 } }
 
-            } catch (IOException ignored) {
+            } catch (IOException e) {
+                System.out.println("PROBLEM SENDING THE MESSAGE TO OTHER USER");
+                //closeEverything(socket, bufferedReader, bufferedWriter);
             }
         }
     }

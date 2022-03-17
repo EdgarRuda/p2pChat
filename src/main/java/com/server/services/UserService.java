@@ -7,8 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
-
 
 /**
  * This class determines data fetching and placing logic with the DB and ClientHandler.
@@ -21,7 +22,6 @@ public class UserService {
 
     private final UserRepo userRepo;
 
-
     /**
      * @param userRepo returns information from the userRepository
      */
@@ -29,7 +29,6 @@ public class UserService {
     public UserService(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-
 
     /**
      * @param userModel refers to the user on which this method is applied.
@@ -40,7 +39,6 @@ public class UserService {
         return bCryptPasswordEncoder.matches(providedPassword, userModel.getPassword());
     }
 
-
     /**
      * @param userModel refers to the user on which this method is applied.
      * @param password accepts the password input.
@@ -49,7 +47,6 @@ public class UserService {
         String hashedPassword = bCryptPasswordEncoder.encode(userModel.getPassword());
         userModel.setPassword(hashedPassword);
     }
-
 
     /**
      * @param userModel refers to the user on which this method is applied.
@@ -60,6 +57,7 @@ public class UserService {
         System.err.println("User: " + userModel.getUserName() + " with port: " + userModel.getPortNumber() + " has been added.");
     }
 
+    public List<UserModel> findAllUsers() {return userRepo.findAll();}
 
     public List<UserModel> findAllOnlineUsers() {return userRepo.findByIpAddressContains(".");}
 
@@ -82,6 +80,11 @@ public class UserService {
     }
 
 
+    public UserModel findUserById(Integer id) {
+        return userRepo.findUserModelById(id)
+                .orElseThrow(() -> new UserNotFoundException("User by id: " + id + " not found."));
+    }
+
     /**
      * @param userName takes the userName that has to be returned.
      * @return returns the user from the database.
@@ -91,6 +94,7 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("User by the name "+userName+" not found"));
     }
 
+    public void deleteUser(Integer id){userRepo.deleteUserById(id);}
 
 
 }

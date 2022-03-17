@@ -7,12 +7,16 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="P2PChatServer_v0.9" />
+        <module name="P2PChatServer_v1" />
         <module name="demo" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="P2PChatServer_v0.9" options="-parameters" />
+      <module name="P2PChatServer_v1" options="-parameters" />
       <module name="demo" options="-parameters" />
     </option>
   </component>
