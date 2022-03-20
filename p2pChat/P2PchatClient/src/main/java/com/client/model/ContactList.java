@@ -18,6 +18,15 @@ public class ContactList {
         currentUser.set(user);
     }
 
+    public void addUser(User user) {
+        contacts.add(user);
+    }
+    public void removeUser(String name){
+        contacts.removeIf(contact -> contact.getName().equals(name));
+    }
+    public void removeUser(User user){
+        contacts.remove(user);
+    }
 
     public User getUser(String user){
         for (User contact : contacts) {
@@ -27,9 +36,13 @@ public class ContactList {
         return null;
     }
 
-    public void addUser(User user) {
-        contacts.add(user);
+    public void clearAndClose(){
+        for (User contact : contacts){
+            contact.closeUdpConnection();
+        }
+        contacts.clear();
     }
+
 
     public void trimSearchResult(ArrayList<String> searchResult){
         ArrayList<String> temp = new ArrayList<>(searchResult);
@@ -41,14 +54,4 @@ public class ContactList {
                     if (contactsModelContact.getName().equals(contact))
                         searchResult.remove(contact);
     }
-
-
-    public void removeUser(String name){
-        contacts.removeIf(contact -> contact.getName().equals(name));
-    }
-
-    public void removeUser(User user){
-        contacts.remove(user);
-    }
-
 }

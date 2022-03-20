@@ -10,13 +10,13 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
@@ -28,10 +28,12 @@ import javafx.util.Duration;
 
 import java.io.IOException;
 import java.net.SocketException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.ResourceBundle;
 
-public class MainFrameController{
+public class MainFrameController implements Initializable {
     @FXML
     private ImageView clearTextButton;
     @FXML
@@ -56,12 +58,20 @@ public class MainFrameController{
     @FXML
     private VBox searchResultBox;
 
-
+    private Stage stage;
     private ContactList contactList;
     private TcpConnection tcpConnection;
     private boolean searchStarted;
 
-
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        stage = ChatApp.getMainStage();
+        stage.setOnHiding(event -> {
+            tcpConnection.exit();
+            contactList.clearAndClose();
+        });
+        initLogoutIcon();
+    }
 
     public void initUserSearch() {
 
@@ -69,16 +79,10 @@ public class MainFrameController{
         scrollableLeftPane.heightProperty().addListener(event ->
                 backgroundPane.setPrefHeight(scrollableLeftPane.getHeight()));
 
-        clearTextButton.setOnMouseClicked(event-> searchBar.setText(""));
-        logoutIcon.setOnMouseClicked(event-> {
-            try {
-                logout();
-            } catch (IOException ignored) {}
-        });
-
         searchResultBox.setTranslateX(-200);
         searchResultNotification.setVisible(false);
         searchResultBox.getChildren().clear();
+
         if(this.tcpConnection != null)
             searchBar.setText("");
         else {
@@ -86,6 +90,10 @@ public class MainFrameController{
             searchBar.setDisable(true);
             return;
         }
+
+        clearTextButton.setOnMouseClicked(event-> searchBar.setText(""));
+
+
         searchBar.textProperty().addListener(event ->{
             //copy pasting doesnt work??
             if(searchBar.getText().length()>2) {
@@ -133,59 +141,54 @@ public class MainFrameController{
 
     }
 
-    public void setContactsModel(ContactList contactList){
-
-        this.contactList = contactList;
-        contactList.setCurrentUser(contactList.getContacts().get(0));
-        userName.setText(contactList.getContacts().get(0).getName());
-
+    private void initLogoutIcon(){
+        logoutIcon.setOnMouseClicked(event-> {
+            try {
+                logout();
+            } catch (IOException ignored) {}
+        });
     }
 
-    public void setTcpConnection(TcpConnection tcpConnection) throws Exception {
+    public void setContactsModel(ContactList contactList){
+        this.contactList = contactList;
+    }
+
+    public void setUserName(String userName){
+        this.userName.setText(userName);
+    }
+
+    public void setTcpConnection(TcpConnection tcpConnection) {
         this.tcpConnection = tcpConnection;
         tcpConnection.setMainController(this);
-        tcpConnection.requestContactData();
         tcpConnection.requestPendingFriends();
+        tcpConnection.requestContactData();
+
         tcpConnection.sendAlive();
-
-
-
-
     }
 
 
     @FXML
     public void logout() throws IOException {
-        if (tcpConnection != null)
-           tcpConnection.logout();
 
-        clearContacts();
+        contactList.clearAndClose();
 
         FXMLLoader loader = new FXMLLoader(ChatApp.class.getResource("/login.fxml"));
         Scene scene = new Scene(loader.load());
+
         LoginController loginController = loader.getController();
-        loginController.initTcpConnection(this.tcpConnection);
+        if (tcpConnection != null) {
+            tcpConnection.logout();
+            loginController.initializeTcpConnection(this.tcpConnection);
+        } else
+            loginController.initializeTcpConnection();
 
-        Stage stage = ChatApp.getMainStage();
+
         stage.setResizable(false);
-
-        if(tcpConnection!=null)
-            stage.setOnHiding(event -> {
-                clearContacts();
-                tcpConnection.exit();
-            });
         stage.setTitle("login");
         stage.setScene(scene);
         stage.show();
     }
 
-    private void clearContacts(){
-        for (User contact : contactList.getContacts()) {
-            contact.closeUdpConnection();
-        }
-
-        contactList.getContacts().clear();
-    }
 
     public void displaySearchResult(ArrayList<String> searchResult) throws IOException {
         Pane pane;
@@ -208,6 +211,8 @@ public class MainFrameController{
                     if (child instanceof Label && child.getId().equals("userName"))
                         ((Label) child).setText(contact);
                     if (child instanceof Circle && child.getId().equals("statusCircle"))
+                        child.setVisible(false);
+                    if (child instanceof Circle && child.getId().equals("messageUnreadStatus"))
                         child.setVisible(false);
                     if (child instanceof Button && child.getId().equals("addUserToContacts")) {
                         child.setVisible(true);
@@ -242,7 +247,7 @@ public class MainFrameController{
 
     public void loadContacts() throws IOException {
         Pane pane;
-        for (User contact : contactList.getContacts().subList(1, contactList.getContacts().size())) {
+        for (User contact : contactList.getContacts()) {
             pane = FXMLLoader.load(Objects.requireNonNull(ChatApp.class.getClassLoader().getResource("profile.fxml")));
 
             bindUserData(contact, pane);
@@ -322,8 +327,10 @@ public class MainFrameController{
             if(contactList.getCurrentUser()!= user) {
 
                 mainPane.setCenter(user.getChatScene().getRoot());
-                contactList.getCurrentUser().setIsFocused(false);
-                contactList.getCurrentUser().setProfileStyle("");
+                if(contactList.getCurrentUser()!=null){
+                    contactList.getCurrentUser().setIsFocused(false);
+                    contactList.getCurrentUser().setProfileStyle("");
+                }
                 contactList.setCurrentUser(user);
                 user.setIsFocused(true);
                 user.setProfileStyle("-fx-background-color: #666699;");

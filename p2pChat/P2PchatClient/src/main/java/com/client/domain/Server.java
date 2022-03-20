@@ -14,5 +14,5 @@ public class Server {
 
     //public static final String IP ="84.15.181.223";
 
-    public static final int TCP_PORT = 28001;
+    public static final int TCP_PORT = 8001;
 }

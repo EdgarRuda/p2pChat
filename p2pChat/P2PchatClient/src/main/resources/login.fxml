@@ -23,8 +23,8 @@
             <TextField fx:id="loginName" layoutX="85.0" layoutY="80.0" prefHeight="25.0" prefWidth="130.0" promptText="username" />
             <PasswordField fx:id="loginPass" layoutX="85.0" layoutY="115.0" prefHeight="25.0" prefWidth="130.0" promptText="password" />
             <Label layoutX="132.0" layoutY="40.0" text="LOGIN" />
-            <Button fx:id="goToRegButton" layoutX="122.0" layoutY="188.0" mnemonicParsing="false" onAction="#toRegister" text="register" />
-            <Button layoutX="127.0" layoutY="250.0" mnemonicParsing="false" onAction="#toDirect" text="direct" />
+            <Button fx:id="goToRegButton" layoutX="122.0" layoutY="188.0" mnemonicParsing="false" onAction="#slideToRegisterWindow" text="register" />
+            <Button layoutX="127.0" layoutY="250.0" mnemonicParsing="false" onAction="#slideToDirectWindow" text="direct" />
             <Label fx:id="serverStatus" alignment="CENTER" contentDisplay="CENTER" layoutY="290.0" prefHeight="17.0" prefWidth="300.0" text="..." />
             <Pane fx:id="redoIcon" layoutX="139.0" layoutY="308.0" onMouseClicked="#resetConnection" prefHeight="24.0" prefWidth="23.0">
                <children>
@@ -44,7 +44,7 @@
             <PasswordField fx:id="firstPassRegistration" layoutX="85.0" layoutY="115.0" prefWidth="130.0" promptText="password" />
             <PasswordField fx:id="secondPassRegistration" layoutX="85.0" layoutY="150.0" prefWidth="130.0" promptText="repeat password" />
             <Button fx:id="registerButton" disable="true" layoutX="123.0" layoutY="190.0" mnemonicParsing="false" onAction="#registerUser" text="register" />
-            <Button layoutX="131.0" layoutY="250.0" mnemonicParsing="false" onAction="#registerToLogin" text="back" />
+            <Button layoutX="131.0" layoutY="250.0" mnemonicParsing="false" onAction="#slideFromRegisterToLogin" text="back" />
             <Label fx:id="registrationStatus" alignment="CENTER" contentDisplay="CENTER" layoutY="290.0" prefHeight="17.0" prefWidth="300.0" text="..." />
          </children>
       </Pane>
@@ -55,7 +55,7 @@
             <TextField fx:id="portField" layoutX="85.0" layoutY="150.0" prefHeight="25.0" prefWidth="130.0" promptText="50 000 - 60 000" />
             <TextField fx:id="directUserName" layoutX="85.0" layoutY="80.0" prefHeight="25.0" prefWidth="130.0" promptText="username" />
             <Label layoutX="91.0" layoutY="40.0" text="DIRECT CONNECTION" />
-            <Button layoutX="130.0" layoutY="250.0" mnemonicParsing="false" onAction="#directToLogin" text="back" />
+            <Button layoutX="130.0" layoutY="250.0" mnemonicParsing="false" onAction="#slideFromDirectToLogin" text="back" />
          </children>
       </Pane>
    </children>

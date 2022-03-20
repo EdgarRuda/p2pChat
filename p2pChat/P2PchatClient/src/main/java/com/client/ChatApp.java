@@ -1,6 +1,7 @@
 package com.client;
 
 import com.client.loginWindowController.LoginController;
+import com.client.model.ContactList;
 import com.client.service.TcpConnection;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -17,23 +18,22 @@ public class ChatApp extends Application {
 
     private static Stage mainStage;
 
+
     public static Stage getMainStage(){ return mainStage;}
-    private static void setMainStage(Stage stage) {mainStage = stage;}
+    private void setMainStage(Stage stage) {mainStage = stage;}
+
 
     @Override
     public void start(Stage stage) throws IOException {
+        setMainStage(stage);
 
         AnchorPane root;
-        TcpConnection tcpConnection = new TcpConnection();
         FXMLLoader loginLoader = new FXMLLoader(ChatApp.class.getResource("/login.fxml"));
 
         root = loginLoader.load();
+        LoginController controller = loginLoader.getController();
+        controller.initializeTcpConnection();
 
-        LoginController loginController = loginLoader.getController();
-        loginController.initTcpConnection(tcpConnection);
-
-        setMainStage(stage);
-        stage.setOnHiding(event -> tcpConnection.exit());
 
         Scene scene = new Scene(root);
         stage.setTitle("login");
@@ -41,6 +41,7 @@ public class ChatApp extends Application {
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();
+
 
     }
 

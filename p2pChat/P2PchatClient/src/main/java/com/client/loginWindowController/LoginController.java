@@ -28,68 +28,91 @@ import java.util.ResourceBundle;
 
 public class LoginController implements Initializable {
 
+    //Frames
     @FXML
     private Pane loginWindow;
     @FXML
     private Pane directWindow;
     @FXML
     private Pane registrationWindow;
+
+    //Login frame
+    @FXML
+    private TextField loginName;
+    @FXML
+    private PasswordField loginPass;
+    @FXML
+    private Button loginButton;
     @FXML
     private Pane redoIcon;
     @FXML
     private Button goToRegButton;
     @FXML
     private Label serverStatus;
+
+
+    //Direct connection frame
     @FXML
-    private Button registerButton;
+    private TextField directUserName;
     @FXML
-    private TextField loginName;
+    private TextField ipField;
     @FXML
-    private PasswordField loginPass;
+    private TextField portField;
+
+
+    //Registration
     @FXML
     private TextField loginRegistration;
     @FXML
     private PasswordField firstPassRegistration;
     @FXML
     private PasswordField secondPassRegistration;
-
     @FXML
-    private Button loginButton;
-    @FXML
-    private TextField portField;
-    @FXML
-    private TextField directUserName;
-    @FXML
-    private TextField ipField;
+    private Button registerButton;
     @FXML
     private Label registrationStatus;
 
-
+    private Stage stage;
     private ContactList contactList;
     private TcpConnection tcpConnection;
     private Validator directConnectionValidator;
     private Validator serverConnectionValidator;
     private Validator registrationValidator;
+    private String userName;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        this.contactList = new ContactList();
 
-        this.directConnectionValidator = new Validator();
-        this.serverConnectionValidator = new Validator();
-        this.registrationValidator = new Validator();
+        stage = ChatApp.getMainStage();
+        stage.setOnHiding(event -> {
+            tcpConnection.exit();
+            contactList.clearAndClose();
+        });
 
         loginName.requestFocus();
+        bindControls();
+        setValidation();
+        initializeContactList();
+    }
+
+    private void bindControls(){
         serverStatus.textProperty().bind(TcpConnection.statusProperty());
         registrationStatus.textProperty().bind(TcpConnection.registrationStatusProperty());
         loginButton.disableProperty().bind(TcpConnection.IsConnectedProperty().not());
         registerButton.disableProperty().bind(TcpConnection.IsConnectedProperty().not());
         goToRegButton.disableProperty().bind(TcpConnection.IsConnectedProperty().not());
         redoIcon.visibleProperty().bind(TcpConnection.IsConnectedProperty().not());
+    }
+
+    private void setValidation() {
+
+        this.directConnectionValidator = new Validator();
+        this.serverConnectionValidator = new Validator();
+        this.registrationValidator = new Validator();
 
         loginPass.setOnKeyPressed(event -> {
             if(event.getText().equals("\r"))
-                    loginToServer();
+                loginToServer();
         });
 
         portField.setOnKeyPressed(event -> {
@@ -208,34 +231,46 @@ public class LoginController implements Initializable {
                 })
                 .decorates(firstPassRegistration)
                 .decorates(secondPassRegistration);
-
     }
+
     @FXML
     private void resetConnection(){
+        tcpConnection.exit();
+
         tcpConnection = new TcpConnection();
-        initTcpConnection(tcpConnection);
+        initializeTcpConnection(tcpConnection);
     }
 
+    public void initializeContactList(){
+        this.contactList = new ContactList();
+    }
 
-    public void initTcpConnection(TcpConnection connect){
-        this.tcpConnection = Objects.requireNonNullElseGet(connect, TcpConnection::new);
+    public void initializeTcpConnection(TcpConnection tcpConnection){
+        this.tcpConnection = tcpConnection;
+        tcpConnection.setContactsModel(contactList);
+    }
 
+    public void initializeTcpConnection(){
+        this.tcpConnection = new TcpConnection();
+        tcpConnection.setContactsModel(contactList);
+        initializeLoginListener();
+    }
+
+    public void initializeLoginListener(){
         tcpConnection.loggedInProperty().addListener(event -> {
-            if (tcpConnection.getLoggedIn()) {
+            if (tcpConnection.getLoggedIn())
                 try {
-                    String name = !loginName.getText().isEmpty() ?
+
+                    userName = !loginName.getText().isEmpty() ?
                             loginName.getText() : loginRegistration.getText();
 
-                    User me = new User(name);
-
-                    contactList.addUser(me);
-                    tcpConnection.setContactsModel(contactList);
+                    tcpConnection.setStatus("connection established");
 
                     openMainFrame(true);
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            }
 
         });
     }
@@ -264,9 +299,7 @@ public class LoginController implements Initializable {
         directConnectionValidator.validate();
         if(directConnectionValidator.containsErrors()) return;
 
-            User me = new User(directUserName.getText());
-
-            contactList.addUser(me);
+            userName = directUserName.getText();
 
             User contact = new User(ipField.getText(), Integer.parseInt(portField.getText()));
             contact.openUdpConnection(Integer.parseInt(portField.getText()));
@@ -289,9 +322,10 @@ public class LoginController implements Initializable {
 
         if (tcpEnabled)
             mainFrameController.setTcpConnection(tcpConnection);
+
         mainFrameController.initUserSearch();
         mainFrameController.setContactsModel(contactList);
-
+        mainFrameController.setUserName(userName);
 
         User user;
 
@@ -339,19 +373,22 @@ public class LoginController implements Initializable {
 
         }
 
+
+
         mainFrameController.loadContacts();
 
-        Stage stage = ChatApp.getMainStage();
         stage.setResizable(true);
         stage.setTitle("chat");
-        stage.setOnHiding(event -> tcpConnection.exit());
         stage.setScene(scene);
         stage.show();
     }
 
+
+
+
     //ANIMATIONS
     @FXML
-    private void toRegister() {
+    private void slideToRegisterWindow() {
         TranslateTransition slideReg = new TranslateTransition();
         slideReg.setDuration(Duration.seconds(0.3));
         slideReg.setNode(registrationWindow);
@@ -367,7 +404,7 @@ public class LoginController implements Initializable {
     }
 
     @FXML
-    private void toDirect() {
+    private void slideToDirectWindow() {
         TranslateTransition slideDir = new TranslateTransition();
         slideDir.setDuration(Duration.seconds(0.3));
         slideDir.setNode(directWindow);
@@ -383,7 +420,7 @@ public class LoginController implements Initializable {
     }
 
     @FXML
-    private void registerToLogin() {
+    private void slideFromRegisterToLogin() {
         TranslateTransition slideLog = new TranslateTransition();
         slideLog.setDuration(Duration.seconds(0.3));
         slideLog.setNode(loginWindow);
@@ -400,7 +437,7 @@ public class LoginController implements Initializable {
     }
 
     @FXML
-    private void directToLogin() {
+    private void slideFromDirectToLogin() {
         TranslateTransition slideDir = new TranslateTransition();
         slideDir.setDuration(Duration.seconds(0.3));
         slideDir.setNode(directWindow);

@@ -113,8 +113,10 @@ public class User  {
     }
 
     public void closeUdpConnection(){
-        if(udpConnection != null)
+        if(udpConnection != null){
             udpConnection.closeSocket();
+            udpConnection=null;
+        }
     }
 
     public void displayMessage(String message){

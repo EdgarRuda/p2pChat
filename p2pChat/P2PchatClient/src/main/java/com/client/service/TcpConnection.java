@@ -232,7 +232,7 @@ public class TcpConnection {
         new Thread(() -> {
             try {
                 while (getIsConnected() && getLoggedIn()) {
-                    for (User contact : contactList.getContacts().subList(1, contactList.getContacts().size()))
+                    for (User contact : contactList.getContacts())
                         if (contact.getIsConfirmed()) {
                             timeStamp();
                             System.out.println(USR_REQUEST + "_" + contact.getName());
@@ -291,7 +291,8 @@ public class TcpConnection {
                 switch (messageArray[0]) {
                     case LOG_USER: {
                         if (messageArray[1].equals("TRUE"))
-                            setLoggedIn(true);
+                            if(!getLoggedIn())
+                                setLoggedIn(true);
 
                         if (messageArray[1].equals("FALSE"))
                             setStatus("login refused");
@@ -313,6 +314,7 @@ public class TcpConnection {
                         if (messageArray[2].equals("FALSE")) {
                             if (contactList.getUser(messageArray[1]).getIsOnline())
                                 contactList.getUser(messageArray[1]).setOnline(false);
+                                contactList.getUser(messageArray[1]).setConnectionPending(false);
                             break;
                         } else {
                             if (VerificationService.verifyIp(messageArray[3]))

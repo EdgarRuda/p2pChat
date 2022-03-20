@@ -2,15 +2,11 @@ package com.client.service;
 
 import com.client.model.User;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -25,6 +21,7 @@ public class UdpConnection {
     private Timer timer = new Timer();
 
     private boolean socketOpen;
+    private boolean timerRunning;
     private final SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
 
     private final String PNG = "PNG";
@@ -84,7 +81,7 @@ public class UdpConnection {
     public void sendMessage(String message) {
         byte[] data;
 
-        if(socketOpen) {
+        if(!socket.isClosed()) {
             try {
                 data = (MSG + "_" + user.getName() + "_" + message).getBytes();
 
@@ -106,7 +103,7 @@ public class UdpConnection {
         new Thread(() -> {
             byte[] data = (PNG + "_" + user.getName()).getBytes();
 
-            while (socketOpen) {
+            while (!socket.isClosed()) {
                 try {
 
                     timeStamp();
@@ -120,11 +117,13 @@ public class UdpConnection {
 
                 } catch (Exception ignored) {
                     timeStamp();
-                    System.out.println("PING - ERROR ON SENDING PLS RESTART");
+                    System.out.println("UDP - PING STOPPED");
                     closeSocket();
                     break;
                 }
             }
+            timeStamp();
+            System.out.println("UDP - PING STOPPED");
         }).start();
 
     }
@@ -137,7 +136,7 @@ public class UdpConnection {
             boolean hasNull;
             timeStamp();
             System.out.println("UDP listening..");
-            while (socketOpen) {
+            while (!socket.isClosed()) {
                 try {
                     hasNull = false;
                     inbound = new DatagramPacket(new byte[1024], 1024);
@@ -162,7 +161,7 @@ public class UdpConnection {
                         case PNG: {
                             if (!user.getIsConnectionEstablished()) {
                                 user.setIsConnectionEstablished(true);
-                                startTimer(user);
+                                startTimer(30);
 
                                 if (user.getName().equals(user.getIp())) {
                                     final String name = messageArr[1];
@@ -176,8 +175,8 @@ public class UdpConnection {
                             timeStamp();
                             System.out.println("inbound  ping: " + messageArr[1] + "_" + inbound.getAddress() + "_" + inbound.getPort());
 
-                            killTimer();
-                            startTimer(user);
+                            restartTimer();
+                            startTimer(30);
                             break;
                         }
                         case MSG: {
@@ -195,9 +194,9 @@ public class UdpConnection {
 
                     }
                 } catch (Exception e) {
-                    System.out.println("UDP SOCKET STATUS: " + socketOpen);
-                    System.out.println("LISTENER - ERROR ON RECEIVING PLS RESTART");
-                    e.printStackTrace();
+                    timeStamp();
+                    System.out.println("UDP - STOPPED LISTENING");
+                    closeSocket();
                     break;
                 }
             }
@@ -205,7 +204,8 @@ public class UdpConnection {
     }
 
 
-    private void startTimer(User user) {
+    private void startTimer(int time) {
+        timerRunning=true;
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
@@ -215,13 +215,15 @@ public class UdpConnection {
 
                 timeStamp();
                 System.out.println("USER: " + user.getName() + " has disconnected");
+                user.closeUdpConnection();
+                timer.cancel();
             }
         };
         timer = new Timer();
-        timer.schedule(task, 30 * 1000L);
+        timer.schedule(task, time * 1000L);
     }
 
-    private void killTimer() {
+    private void restartTimer() {
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
@@ -229,21 +231,21 @@ public class UdpConnection {
         };
         timer.cancel();
         timer = new Timer();
-        timer.schedule(task, 15 * 1000L);
-
+        timer.schedule(task, 0);
     }
 
+
     public void closeSocket() {
-        if (socket != null) {
+        if(timerRunning){
+            restartTimer();
+            startTimer(1);
+        }
+        if (!socket.isClosed()) {
             socketOpen = false;
             timeStamp();
             System.out.println("UDP CLOSE: " + socket.getLocalPort());
-            try {
-                socket.send(new DatagramPacket("EXT".getBytes(), 3, InetAddress.getByName("localhost"), socket.getLocalPort()));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
             socket.close();
+
         }
     }
 
