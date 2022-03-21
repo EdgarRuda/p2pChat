@@ -11,9 +11,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -22,7 +20,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -30,7 +27,6 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.ResourceBundle;
 
 public class MainFrameController implements Initializable {
@@ -67,7 +63,8 @@ public class MainFrameController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         stage = ChatApp.getMainStage();
         stage.setOnHiding(event -> {
-            tcpConnection.exit();
+            if(tcpConnection!=null)
+                tcpConnection.exit();
             contactList.clearAndClose();
         });
         initLogoutIcon();
@@ -75,7 +72,6 @@ public class MainFrameController implements Initializable {
 
     public void initUserSearch() {
 
-        scrollableLeftPane.requestFocus();
         scrollableLeftPane.heightProperty().addListener(event ->
                 backgroundPane.setPrefHeight(scrollableLeftPane.getHeight()));
 
@@ -83,8 +79,9 @@ public class MainFrameController implements Initializable {
         searchResultNotification.setVisible(false);
         searchResultBox.getChildren().clear();
 
-        if(this.tcpConnection != null)
+        if(this.tcpConnection != null){
             searchBar.setText("");
+        }
         else {
             searchBar.setText("search disabled");
             searchBar.setDisable(true);
@@ -162,7 +159,6 @@ public class MainFrameController implements Initializable {
         tcpConnection.setMainController(this);
         tcpConnection.requestPendingFriends();
         tcpConnection.requestContactData();
-
         tcpConnection.sendAlive();
     }
 
@@ -191,153 +187,87 @@ public class MainFrameController implements Initializable {
 
 
     public void displaySearchResult(ArrayList<String> searchResult) throws IOException {
-        Pane pane;
-
-        contactList.trimSearchResult(searchResult);
+        contactList.trimSearchResult(searchResult, userName.getText());
         if(searchResult.isEmpty()) {
             Platform.runLater(() -> searchResultNotification.setText("no users found"));
             searchResultNotification.setVisible(true);
             return;
         }
         searchResultNotification.setVisible(false);
-        for (String contact : searchResult) {
+        User user;
+        for (String name : searchResult) {
+                user = new User(name);
+                user.setIsSearchResult(true);
+                user.setMainFrameController(this);
 
-
-                pane = FXMLLoader.load(Objects.requireNonNull(ChatApp.class.getClassLoader().getResource("profile.fxml")));
-
-                for (Node child : pane.getChildren()) {
-                    if (child instanceof Label && child.getId().equals("userInitials"))
-                        ((Label) child).setText(contact.substring(0,1));
-                    if (child instanceof Label && child.getId().equals("userName"))
-                        ((Label) child).setText(contact);
-                    if (child instanceof Circle && child.getId().equals("statusCircle"))
-                        child.setVisible(false);
-                    if (child instanceof Circle && child.getId().equals("messageUnreadStatus"))
-                        child.setVisible(false);
-                    if (child instanceof Button && child.getId().equals("addUserToContacts")) {
-                        child.setVisible(true);
-                        Pane finalPane1 = pane;
-                        ((Button) child).setOnAction(event -> {
-                            try {
-                                Platform.runLater(() -> {
-                                    searchResultBox.getChildren().remove(finalPane1);
-                                    if(searchResultBox.getChildren().isEmpty())
-                                        searchBar.setText("");
-                                });
-
-                                User user = new User(contact);
-                                user.setIsOutboundRequest(true);
-                                contactList.addUser(user);
-                                tcpConnection.friendRequest(contact);
-                                loadSingleContact(user);
-
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        });
-                    }
-                }
-
-                Pane finalPane = pane;
-                finalPane.setId("userProfiles");
-                Platform.runLater(() -> searchResultBox.getChildren().add(finalPane));
+                addProfileToSearchList(user);
             }
     }
 
 
-    public void loadContacts() throws IOException {
-        Pane pane;
-        for (User contact : contactList.getContacts()) {
-            pane = FXMLLoader.load(Objects.requireNonNull(ChatApp.class.getClassLoader().getResource("profile.fxml")));
+    public void loadContacts() {
+        for (User user : contactList.getContacts())
+            loadSingleContact(user);
 
-            bindUserData(contact, pane);
-            Pane finalPane = pane;
+    }
 
-            Platform.runLater(() -> contactListBox.getChildren().add(finalPane));
+    public void loadSingleContact(User user) {
+        user.setMainFrameController(this);
+        addProfileToContactList(user);
+
+    }
+
+    public void addProfileToContactList(User user){
+        Platform.runLater(() -> contactListBox.getChildren().add(user.getProfilePane()));
+    }
+
+    public void removeProfileFromContactList(User user){
+        Platform.runLater(()->contactListBox.getChildren().remove(user.getProfilePane()));
+
+    }
+
+    public void addProfileToSearchList(User user){
+        Platform.runLater(() -> searchResultBox.getChildren().add(user.getProfilePane()));
+    }
+
+    public void removeProfileFromSearchList(User user){
+        searchResultBox.getChildren().remove(user.getProfilePane());
+    }
+
+    public void declineRequest(User user){
+        tcpConnection.respondToFriendRequest(user.getName(), false);
+        contactList.removeUser(user);
+        removeProfileFromContactList(user);
+    }
+
+    public void approveRequest(User user){
+        tcpConnection.respondToFriendRequest(user.getName(), true);
+    }
+
+    public void sendRequest(User user){
+
+        removeProfileFromSearchList(user);
+
+        if(searchResultBox.getChildren().isEmpty())
+            searchBar.setText("");
+
+        contactList.addUser(user);
+        tcpConnection.friendRequest(user.getName());
+        loadSingleContact(user);
+    }
+
+    public void loadChat(User user){
+        if(contactList.getCurrentUser()!= user) {
+
+            mainPane.setCenter(user.getChatPane());
+            if(contactList.getCurrentUser()!=null){
+                contactList.getCurrentUser().setIsFocused(false);
+                contactList.getCurrentUser().setProfileStyle("");
+            }
+            contactList.setCurrentUser(user);
+            user.setIsFocused(true);
+            user.setProfileStyle("-fx-background-color: #666699;");
         }
     }
-
-    public void removeSingleUser(String userName){
-        contactListBox.getChildren().removeIf(child -> child instanceof Label && child.getId().equals(userName));
-    }
-
-    public void loadSingleContact(User user) throws IOException {
-        Pane pane;
-        pane = FXMLLoader.load(Objects.requireNonNull(ChatApp.class.getClassLoader().getResource("profile.fxml")));
-
-        bindUserData(user, pane);
-        Pane finalPane = pane;
-
-        Platform.runLater(() -> contactListBox.getChildren().add(finalPane));
-
-
-    }
-    private void bindUserData(User user, Pane pane){
-
-        for (Node child : pane.getChildren()) {
-            if (child instanceof Label && child.getId().equals("userInitials"))
-                ((Label) child).setText(user.getName().substring(0,1));
-            if (child instanceof Label && child.getId().equals("userName"))
-                ((Label) child).textProperty().bind(user.nameProperty());
-            if (child instanceof Label && child.getId().equals("userStatus"))
-                ((Label) child).textProperty().bind(user.userStatusProperty());
-            if (child.getId().equals("messageUnreadStatus"))
-                child.visibleProperty().bind(user.messageUnreadProperty());
-            if (child.getId().equals("statusCircle")){
-                child.visibleProperty().bind(user.isConfirmedProperty());
-                child.styleProperty().bind(user.profileStatusProperty());
-            }
-//            if (child instanceof Pane && child.getId().equals("focusPane")) {
-//                child.setOnMouseEntered(event -> child.setStyle("-fx-background-color: #666699;"));
-//                child.setOnMouseExited(event -> child.setStyle(""));
-//            }
-            if (child.getId().equals("declineContact")){
-                child.visibleProperty().bind(user.isInboundRequestProperty());
-                if (user.getIsInboundRequest()){
-                    child.setOnMouseClicked(event -> {
-
-                            tcpConnection.respondToFriendRequest(user.getName(), false);
-                            contactList.removeUser(user);
-                            Platform.runLater(()->contactListBox.getChildren().remove(pane));
-                    });
-                }
-            }
-            if (child instanceof Button && child.getId().equals("addUserToContacts")){
-               child.visibleProperty().bind(user.isInboundRequestProperty());
-
-                if (user.getIsInboundRequest()){
-
-                    ((Button) child).setOnAction(event -> {
-                        try {
-                            user.setIsConfirmed();
-                            tcpConnection.respondToFriendRequest(user.getName(), true);
-
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    });
-                }
-            }
-        }
-
-        pane.styleProperty().bind(user.profileStyleProperty());
-
-        pane.setOnMouseClicked(mouseEvent -> {
-            if(contactList.getCurrentUser()!= user) {
-
-                mainPane.setCenter(user.getChatScene().getRoot());
-                if(contactList.getCurrentUser()!=null){
-                    contactList.getCurrentUser().setIsFocused(false);
-                    contactList.getCurrentUser().setProfileStyle("");
-                }
-                contactList.setCurrentUser(user);
-                user.setIsFocused(true);
-                user.setProfileStyle("-fx-background-color: #666699;");
-            }
-
-        });
-    }
-
 
 }

@@ -44,7 +44,7 @@
    -fx-text-fill: white;
 }
 
-.userProfiles : mouse-over{
+#userProfiles : mouse-over{
 -fx-background-color: #666699;
 }
 

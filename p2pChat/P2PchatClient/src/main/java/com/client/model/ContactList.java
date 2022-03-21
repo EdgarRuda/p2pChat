@@ -44,14 +44,14 @@ public class ContactList {
     }
 
 
-    public void trimSearchResult(ArrayList<String> searchResult){
+    public void trimSearchResult(ArrayList<String> searchResult, String myName){
         ArrayList<String> temp = new ArrayList<>(searchResult);
         if (!searchResult.isEmpty())
             searchResult.remove(0);
         if (!searchResult.isEmpty())
             for (String contact : temp)
                 for (User contactsModelContact : contacts)
-                    if (contactsModelContact.getName().equals(contact))
+                    if (contactsModelContact.getName().equals(contact) || contact.equals(myName))
                         searchResult.remove(contact);
     }
 }

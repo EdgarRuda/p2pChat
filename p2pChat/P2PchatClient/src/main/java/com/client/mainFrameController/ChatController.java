@@ -41,7 +41,7 @@ public class ChatController implements Initializable {
     private User user;
     DateFormat format = new SimpleDateFormat("HH:mm");
 
-    public void setupUser(User user){
+    public void setUser(User user){
         this.user = user;}
 
     @FXML

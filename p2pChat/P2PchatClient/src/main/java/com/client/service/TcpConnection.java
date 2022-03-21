@@ -81,8 +81,10 @@ public class TcpConnection {
     }
     public final void setConnectionStarted(boolean status) {
         Platform.runLater(() -> connectionStartedProperty().set(status));
+        if(status){
         timeStamp();
-        System.out.println("CONNECTION STARTED: " + status);
+        System.out.println("CONNECTION STARTED");
+        }
     }
 
 
@@ -291,8 +293,9 @@ public class TcpConnection {
                 switch (messageArray[0]) {
                     case LOG_USER: {
                         if (messageArray[1].equals("TRUE"))
-                            if(!getLoggedIn())
+                            if(!getLoggedIn()){
                                 setLoggedIn(true);
+                             }
 
                         if (messageArray[1].equals("FALSE"))
                             setStatus("login refused");
@@ -346,8 +349,8 @@ public class TcpConnection {
                             break;
                         }
                         if (messageArray[2].equals("FALSE")) {
+                            mainFrameController.removeProfileFromContactList(contactList.getUser(messageArray[1]));
                             contactList.removeUser(messageArray[1]);
-                            mainFrameController.removeSingleUser(messageArray[1]);
                             break;
                         }
                     }

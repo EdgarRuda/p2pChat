@@ -78,7 +78,7 @@ public class LoginController implements Initializable {
     private Validator directConnectionValidator;
     private Validator serverConnectionValidator;
     private Validator registrationValidator;
-    private String userName;
+    private static String userName;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -92,6 +92,7 @@ public class LoginController implements Initializable {
         loginName.requestFocus();
         bindControls();
         setValidation();
+        setKeyListeners();
         initializeContactList();
     }
 
@@ -104,12 +105,7 @@ public class LoginController implements Initializable {
         redoIcon.visibleProperty().bind(TcpConnection.IsConnectedProperty().not());
     }
 
-    private void setValidation() {
-
-        this.directConnectionValidator = new Validator();
-        this.serverConnectionValidator = new Validator();
-        this.registrationValidator = new Validator();
-
+    private void setKeyListeners(){
         loginPass.setOnKeyPressed(event -> {
             if(event.getText().equals("\r"))
                 loginToServer();
@@ -129,6 +125,13 @@ public class LoginController implements Initializable {
             if(event.getText().equals("\r"))
                 registerUser();
         });
+    }
+
+    private void setValidation() {
+
+        this.directConnectionValidator = new Validator();
+        this.serverConnectionValidator = new Validator();
+        this.registrationValidator = new Validator();
 
         directConnectionValidator.createCheck()
                 .dependsOn("username", directUserName.textProperty())
@@ -236,9 +239,7 @@ public class LoginController implements Initializable {
     @FXML
     private void resetConnection(){
         tcpConnection.exit();
-
-        tcpConnection = new TcpConnection();
-        initializeTcpConnection(tcpConnection);
+        initializeTcpConnection();
     }
 
     public void initializeContactList(){
@@ -261,12 +262,9 @@ public class LoginController implements Initializable {
             if (tcpConnection.getLoggedIn())
                 try {
 
-                    userName = !loginName.getText().isEmpty() ?
-                            loginName.getText() : loginRegistration.getText();
-
                     tcpConnection.setStatus("connection established");
 
-                    openMainFrame(true);
+                    this.openMainFrame(true);
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -279,8 +277,10 @@ public class LoginController implements Initializable {
     private void loginToServer() {
         if (TcpConnection.getIsConnected()) {
             serverConnectionValidator.validate();
-            if (!serverConnectionValidator.containsErrors())
+            if (!serverConnectionValidator.containsErrors()){
                 tcpConnection.tryToLogin(loginName.getText(), loginPass.getText());
+                userName = loginName.getText();
+            }
         }
     }
 
@@ -288,10 +288,11 @@ public class LoginController implements Initializable {
     private void registerUser()  {
         if (TcpConnection.getIsConnected()){
             registrationValidator.validate();
-            if(!registrationValidator.containsErrors())
+            if(!registrationValidator.containsErrors()) {
                 tcpConnection.registerUser(loginRegistration.getText(), firstPassRegistration.getText());
-
+                userName = loginRegistration.getText();
             }
+        }
     }
 
     @FXML
@@ -327,60 +328,14 @@ public class LoginController implements Initializable {
         mainFrameController.setContactsModel(contactList);
         mainFrameController.setUserName(userName);
 
-        User user;
-
-        if(loginName.getText().equals("test1")) {
-            user = new User("test2");
-            user.setIsConfirmed();
-            user.setIsConnectionEstablished(false);
-            contactList.addUser(user);
-
-            user = new User("test3");
-            user.setIsInboundRequest(true);
-            user.setIsConnectionEstablished(false);
-            contactList.addUser(user);
-
-            user = new User("test4");
-            user.setIsOutboundRequest(true);
-            user.setIsConnectionEstablished(false);
-            contactList.addUser(user);
-
-        }
-
-        if(loginName.getText().equals("test2")) {
-            user = new User("test1");
-            user.setIsConfirmed();
-            user.setIsConnectionEstablished(false);
-            contactList.addUser(user);
-
-            user = new User("test3");
-            user.setIsConfirmed();
-            user.setIsConnectionEstablished(false);
-            contactList.addUser(user);
-
-        }
-
-        if(loginName.getText().equals("test3")) {
-            user = new User("test1");
-            user.setIsConfirmed();
-            user.setIsConnectionEstablished(false);
-            contactList.addUser(user);
-
-            user = new User("test2");
-            user.setIsConfirmed();
-            user.setIsConnectionEstablished(false);
-            contactList.addUser(user);
-
-        }
-
-
-
-        mainFrameController.loadContacts();
-
         stage.setResizable(true);
         stage.setTitle("chat");
         stage.setScene(scene);
         stage.show();
+
+        if (!tcpEnabled)
+            mainFrameController.loadContacts();
+
     }
 
 

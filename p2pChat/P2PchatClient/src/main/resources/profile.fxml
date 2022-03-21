@@ -7,28 +7,33 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<Pane fx:id="contactProfile" prefHeight="80.0" prefWidth="200.0" stylesheets="styles.css, noFocus.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
-   <children>
+<Pane fx:id="contactProfile" prefHeight="80.0" prefWidth="200.0" stylesheets="styles.css, noFocus.css"
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.client.mainFrameController.ProfileController">
+   <Pane fx:id="colorPane" mouseTransparent="true" prefHeight="80.0" prefWidth="200.0"/>
 
-<!--      <Pane id="colorPane" focusTraversable="true"  prefHeight="80.0" prefWidth="200.0" />-->
+   <Label fx:id="userName" layoutX="80.0" layoutY="20.0" text="Label"/>
+   <Label fx:id="userStatus" layoutX="80.0" layoutY="40.0" text="Label"/>
+   <Circle fx:id="userCircle" fill="#acb2b9" layoutX="40.0" layoutY="40.0" radius="25.0"/>
+   <Label fx:id="userInitials" alignment="CENTER" contentDisplay="CENTER" graphicTextGap="0.0" layoutX="15.0"
+          layoutY="11.0" maxHeight="50.0" maxWidth="50.0" minHeight="50.0" minWidth="50.0" prefHeight="50.0"
+          prefWidth="50.0" text="u" textAlignment="CENTER">
+      <font>
+         <Font name="Arial Bold" size="40.0"/>
+      </font>
+   </Label>
+   <Circle fx:id="statusCircle" fill="#c94242" layoutX="55.0" layoutY="55.0" radius="8.0" stroke="BLACK"/>
+   <Button fx:id="approveRequestButton" layoutX="152.0" layoutY="28.0" mnemonicParsing="false" text="in"/>
+   <Circle fx:id="declineContactIcon" fill="#c94242" layoutX="187.0" layoutY="30.0" radius="6.0" stroke="BLACK"
+           visible="false"/>
+   <Text fx:id="declineContactText" focusTraversable="true" layoutX="184.0" layoutY="33.0" mouseTransparent="true"
+         strokeType="OUTSIDE" strokeWidth="0.0" text="x" visible="false" wrappingWidth="6.828125">
+      <font>
+         <Font name="System Bold" size="10.0"/>
+      </font>
+   </Text>
+   <Circle fx:id="messageUnreadStatus" layoutX="183.0" layoutY="39.0" radius="8.0" stroke="BLACK"/>
+   <Button fx:id="sendRequestButton" layoutX="152.0" layoutY="28.0" mnemonicParsing="false" text="out"/>
 
-      <Label id="userName" layoutX="80.0" layoutY="20.0" text="Label" />
-      <Label id="userStatus" layoutX="80.0" layoutY="40.0" text="Label" />
-      <Circle id="userCircle" fill="#acb2b9" layoutX="40.0" layoutY="40.0" radius="25.0" />
-      <Label id="userInitials" alignment="CENTER" contentDisplay="CENTER" graphicTextGap="0.0" layoutX="15.0" layoutY="11.0" maxHeight="50.0" maxWidth="50.0" minHeight="50.0" minWidth="50.0" prefHeight="50.0" prefWidth="50.0" text="u" textAlignment="CENTER">
-         <font>
-            <Font name="Arial Bold" size="40.0" />
-         </font>
-      </Label>
-      <Circle id="statusCircle" fill="#c94242" layoutX="55.0" layoutY="55.0" radius="8.0" stroke="BLACK" />
-      <Button id="addUserToContacts" layoutX="152.0" layoutY="28.0" mnemonicParsing="false" text="add" />
-      <Circle id="declineContact" fill="#c94242" layoutX="187.0" layoutY="30.0" radius="6.0" stroke="BLACK" visible="false" />
-      <Text id="declineContact" focusTraversable="true" layoutX="184.0" layoutY="33.0" mouseTransparent="true" strokeType="OUTSIDE" strokeWidth="0.0" text="x" visible="false" wrappingWidth="6.828125">
-         <font>
-            <Font name="System Bold" size="10.0" />
-         </font>
-      </Text>
-      <Circle id="messageUnreadStatus" layoutX="183.0" layoutY="39.0" radius="8.0" stroke="BLACK" />
-<!--      <Pane id="focusPane" focusTraversable="true"  prefHeight="80.0" prefWidth="200.0" />-->
-   </children>
+   <Pane fx:id="focusPane" mouseTransparent="true" prefHeight="80.0" prefWidth="200.0"/>
 </Pane>

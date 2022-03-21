@@ -2,11 +2,13 @@ package com.client.model;
 
 import com.client.ChatApp;
 import com.client.mainFrameController.ChatController;
+import com.client.mainFrameController.MainFrameController;
+import com.client.mainFrameController.ProfileController;
 import com.client.service.UdpConnection;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
+import javafx.scene.layout.Pane;
 
 import java.io.IOException;
 
@@ -20,8 +22,6 @@ public class User  {
     public final void setName(String name){
       nameProperty().set(name);
     }
-
-
 
     private final IntegerProperty port = new SimpleIntegerProperty();
     public final IntegerProperty portProperty() { return this.port;}
@@ -66,12 +66,6 @@ public class User  {
             this.setProfileStatus("-fx-fill: #c62222; -fx-stroke: black;");
         }
     }
-    public User(){
-        setOnline(false);
-    }
-
-    public final Scene getChatScene() {return  chatScene;}
-
 
     private final BooleanProperty isOutboundRequest = new SimpleBooleanProperty();
     public final BooleanProperty isOutboundRequestProperty() { return this.isOutboundRequest;}
@@ -84,6 +78,10 @@ public class User  {
     public boolean getIsInboundRequest() {return this.isInboundRequest.get();}
     public void setIsInboundRequest(boolean status) {this.isInboundRequestProperty().set(status);}
 
+    private final BooleanProperty isSearchResult = new SimpleBooleanProperty();
+    public final BooleanProperty isSearchResultProperty() { return this.isSearchResult;}
+    public boolean getIsisSearchResult() {return this.isSearchResult.get();}
+    public void setIsSearchResult(boolean status) {this.isSearchResultProperty().set(status);}
 
     public void setOnline(boolean status) {this.isOnline = status;}
     public boolean getIsOnline() {return this.isOnline;}
@@ -98,6 +96,7 @@ public class User  {
         this.isConfirmedProperty().set(true);
         Platform.runLater(()->this.setIsOutboundRequest(false));
         Platform.runLater(()->this.setIsInboundRequest(false));
+        this.setIsConnectionEstablished(false);
     }
 
     private final BooleanProperty messageUnread = new SimpleBooleanProperty();
@@ -105,25 +104,60 @@ public class User  {
     public boolean getMessageUnread(){return this.messageUnread.get();}
     public void setMessageUnread(boolean status) {this.messageUnread.set(status);}
 
-    private void initializeController() throws IOException {
+
+
+    //chat controller
+
+    public final Pane getChatPane() {return chatPane;}
+
+    private void initializeChatController() throws IOException {
         FXMLLoader loader = new FXMLLoader(ChatApp.class.getResource("/chat.fxml"));
-        chatScene = new Scene(loader.load());
+        chatPane = loader.load();
         chatController = loader.getController();
-        chatController.setupUser(this);
+        chatController.setUser(this);
     }
 
-    public void closeUdpConnection(){
-        if(udpConnection != null){
-            udpConnection.closeSocket();
-            udpConnection=null;
-        }
+    public void loadChat(){
+        mainFrameController.loadChat(this);
     }
 
     public void displayMessage(String message){
         chatController.displayMessage(message);
     }
+
     public void sendUdpMessage(String message){udpConnection.sendMessage(message);}
 
+
+
+    //profile controller
+    public final Pane getProfilePane() {return profilePane;}
+
+    private void initializeProfileController() throws IOException {
+        FXMLLoader loader = new FXMLLoader(ChatApp.class.getResource("/profile.fxml"));
+        profilePane = loader.load();
+        profileController = loader.getController();
+        profileController.setUser(this);
+    }
+
+    public void declineUsersRequest(){
+        mainFrameController.declineRequest(this);
+    }
+
+    public void approveRequest(){
+        setIsConfirmed();
+        setIsConnectionEstablished(false);
+        mainFrameController.approveRequest(this);
+    }
+
+    public void sendRequest() {
+        setIsSearchResult(false);
+        setIsOutboundRequest(true);
+        mainFrameController.sendRequest(this);
+    }
+
+    public void setMainFrameController(MainFrameController mainFrameController){
+        this.mainFrameController = mainFrameController;
+    }
 
     public boolean getIsFocused(){return this.isFocused;}
     public void setIsFocused(boolean status) {
@@ -132,7 +166,9 @@ public class User  {
     }
 
 
-    //direct connection
+
+    //UDP service
+    //for direct connection
 
     public void openUdpConnection(int port)  {
         udpConnection = new UdpConnection(port);
@@ -147,7 +183,7 @@ public class User  {
     }
 
 
-    //server connection
+    //for server connection
     public void openUdpConnection() {
         udpConnection = new UdpConnection();
         udpConnection.setUser(this);
@@ -173,23 +209,31 @@ public class User  {
         }catch (Exception ignored){}
     }
 
+    public void closeUdpConnection(){
+        if(udpConnection != null){
+            udpConnection.closeSocket();
+            udpConnection=null;
+        }
+    }
+
     //Constructors
 
     public User(String ip, int port) throws IOException {
         setName(ip);
         setIp(ip);
         setPort(port);
+        initializeChatController();
+        initializeProfileController();
         setIsConnectionEstablished(false);
-        initializeController();
     }
 
     public User(String name) throws IOException {
         setName(name);
         setIp("");
+        initializeChatController();
+        initializeProfileController();
         setIsConnectionEstablished(false);
-        initializeController();
     }
-
 
 
     private UdpConnection udpConnection;
@@ -198,8 +242,14 @@ public class User  {
     private boolean connectionPending;
     public boolean isFocused;
 
-    private Scene chatScene;
+    private Pane chatPane;
     private ChatController chatController;
+
+    private Pane profilePane;
+    private ProfileController profileController;
+
+    private MainFrameController mainFrameController;
+
 
 
 }
