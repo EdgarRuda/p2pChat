@@ -3,7 +3,8 @@
 p2pChat app build with javaFx using UDP hole-punching
 
 
-![](../../Downloads/chat-screen.png)
+
+![chat-screen](https://user-images.githubusercontent.com/53341064/159577880-2e06a59c-7eed-4ffc-a8ce-e2849485051d.png)
 
 client has two working modes:
 1. direct connection to other client without registration
