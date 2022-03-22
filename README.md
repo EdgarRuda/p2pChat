@@ -37,7 +37,7 @@ Enabled by registering new account (does not require additional data).
 
 Logging in enables other users search and adding them to yours contacts list making it possible to communicate with more than one user at a time compared to direct mode.
 
-#TODO
+# TODO
 1. multiple user support in direct mode
 2. group chats
 3. TURN functionality for server
