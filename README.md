@@ -10,7 +10,8 @@ client has two working modes:
 1. direct connection to other client without registration
 2. using main server for information exchange
 
-#client to server
+# client to server
+
 Main purpose of server is to act as a meeting point for two clients to exchange information - ip address and udp socket port number.
 
 Server is also used to indicate which users from a friends lists are currently online and signaling to client that it is possible to start udp connection with those users.
@@ -21,7 +22,8 @@ Additional functionality includes saving friends lists in db (later will be move
 
 Server parameters are specified in clients Server class.
 
-#client to client
+# client to client
+
 Client to client communication is based on udp hole-punching method. Main downside to that method is that such connection is not guaranteed to work with every router.
 
 Direct mode:
