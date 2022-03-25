@@ -16,25 +16,25 @@ Main purpose of server is to act as a meeting point for two clients to exchange 
 
 Server is also used to indicate which users from a friends lists are currently online and signaling to client that it is possible to start udp connection with those users.
 
-Users ip is stored only while he is connected to main server and is deleted upon going offline.
+User's ip is stored only while he is connected to the main server and is deleted upon going offline.
 
 Additional functionality includes saving friends lists in db (later will be moved to local storage).  
 
 
 # client to client
 
-Client to client communication is based on udp hole-punching method. Main downside to that method is that such connection is not guaranteed to work with every router.
+Client to client communication is based on udp hole-punching. Main downside to that method is that such connection is not guaranteed to work with every router.
 
 Direct mode:
 
-Connection to other client without registering account. Works by specifying other users public ip and agreeing upon using specific port number beforehand.
-For now works only with single user, search for other users in this mode is disabled.
+Connection to other client without registering account. Works by specifying other user public ip and agreeing upon using specific port number beforehand.
+For now works only with single user. Search bar and communication with reagistered users are disabled.
 
 Server connection:
 
 Enabled by registering new account (does not require additional data). 
 
-Logging in enables other users search and adding them to yours contacts list making it possible to communicate with more than one user at a time compared to direct mode.
+Logging in enables other user search and adding them to your contacts list, making it possible to communicate with more than one user at a time compared to direct mode.
 
 # configurations
 
