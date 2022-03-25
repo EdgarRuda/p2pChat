@@ -20,7 +20,6 @@ Users ip is stored only while he is connected to main server and is deleted upon
 
 Additional functionality includes saving friends lists in db (later will be moved to local storage).  
 
-Server parameters are specified in clients Server class.
 
 # client to client
 
@@ -36,6 +35,18 @@ Server connection:
 Enabled by registering new account (does not require additional data). 
 
 Logging in enables other users search and adding them to yours contacts list making it possible to communicate with more than one user at a time compared to direct mode.
+
+# configurations
+
+server:
+
+1. Postgresql must be installed
+2. Change the login information for postgreSQL on application properties.
+3. Download Maven dependencies
+
+client:
+
+1.Change server ip in Server class  
 
 # TODO
 1. multiple user support in direct mode
