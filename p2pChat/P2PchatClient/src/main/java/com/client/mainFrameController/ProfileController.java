@@ -10,9 +10,7 @@ import javafx.scene.text.Text;
 
 public class ProfileController {
     @FXML
-    private Pane colorPane;
-    @FXML
-    private Pane focusPane;
+    private Pane highlightPane;
     @FXML
     private Button sendRequestButton;
     @FXML
@@ -23,8 +21,6 @@ public class ProfileController {
     private Label userName;
     @FXML
     private Label userStatus;
-    @FXML
-    private Circle userCircle;
     @FXML
     private Label userInitials;
     @FXML
@@ -45,8 +41,8 @@ public class ProfileController {
 
     public void bindProperties(){
 
-        focusPane.setOnMouseEntered(event -> colorPane.setStyle("-fx-background-color: #666699;"));
-        focusPane.setOnMouseExited(event -> colorPane.setStyle(""));
+        contactProfile.setOnMouseEntered(event -> highlightPane.setStyle("-fx-background-color: #666699;"));
+        contactProfile.setOnMouseExited(event -> highlightPane.setStyle(""));
 
         userInitials.setText(user.getName().substring(0,1));
         userName.textProperty().bind(user.nameProperty());
