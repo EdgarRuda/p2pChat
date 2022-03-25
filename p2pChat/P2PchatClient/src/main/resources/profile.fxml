@@ -10,6 +10,7 @@
 <Pane fx:id="contactProfile" prefHeight="80.0" prefWidth="200.0" stylesheets="styles.css, noFocus.css"
       xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.client.mainFrameController.ProfileController">
+
    <Pane fx:id="colorPane" mouseTransparent="true" prefHeight="80.0" prefWidth="200.0"/>
 
    <Label fx:id="userName" layoutX="80.0" layoutY="20.0" text="Label"/>
@@ -35,5 +36,5 @@
    <Circle fx:id="messageUnreadStatus" layoutX="183.0" layoutY="39.0" radius="8.0" stroke="BLACK"/>
    <Button fx:id="sendRequestButton" layoutX="152.0" layoutY="28.0" mnemonicParsing="false" text="out"/>
 
-   <Pane fx:id="focusPane" mouseTransparent="true" prefHeight="80.0" prefWidth="200.0"/>
+   <Pane fx:id="focusPane" prefHeight="80.0" prefWidth="200.0"/>
 </Pane>

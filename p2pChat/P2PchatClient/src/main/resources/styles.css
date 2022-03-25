@@ -44,11 +44,6 @@
    -fx-text-fill: white;
 }
 
-#userProfiles : mouse-over{
--fx-background-color: #666699;
-}
-
-
 
 #borderPaneScroll {
 -fx-background-color: #212121;
